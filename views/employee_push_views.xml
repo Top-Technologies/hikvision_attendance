@@ -24,10 +24,17 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
-# Get the first Hikvision device
-device = env['hikvision.device'].search([], limit=1)
-if not device:
-    raise UserError("No Hikvision device configured. Please configure a device first.")
+# Get device from context (set by action_push_selected_employees)
+device_id = env.context.get('hikvision_device_id')
+if not device_id:
+    # Fallback: get the first device if context not set
+    device = env['hikvision.device'].search([], limit=1)
+    if not device:
+        raise UserError("No Hikvision device configured. Please configure a device first.")
+else:
+    device = env['hikvision.device'].browse(device_id)
+    if not device.exists():
+        raise UserError("Selected Hikvision device not found.")
 
 # Push selected employees
 result = device.push_employees_by_ids(records.ids)

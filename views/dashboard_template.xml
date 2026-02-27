@@ -7,6 +7,7 @@
         <table class="table table-bordered">
           <tr>
             <th>Name</th>
+            <th>Department</th>
             <th>First In</th>
             <th>Last Out</th>
             <th>Status</th>
@@ -16,6 +17,7 @@
           <t t-foreach="logs" t-as="log">
             <tr>
               <td><t t-esc="log.employee_id.name"/></td>
+              <td><t t-esc="log.employee_id.department_id.name"/></td>
               <td><t t-esc="log.first_in"/></td>
               <td><t t-esc="log.last_out"/></td>
               <td><t t-esc="log.status"/></td>

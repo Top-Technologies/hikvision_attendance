@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.addons.base.models.res_partner import _tz_get
 from odoo.exceptions import ValidationError
 
 class HikvisionWorkPolicy(models.Model):
@@ -10,6 +11,9 @@ class HikvisionWorkPolicy(models.Model):
     # Work Schedule
     work_start = fields.Float(string="Work Start Time", default=8.5, help="e.g. 8.5 for 08:30")
     work_end = fields.Float(string="Work End Time", default=17.5, help="e.g. 17.5 for 17:30")
+    work_end_saturday = fields.Float(string="Saturday End Time", default=13.0, help="e.g. 13.0 for 13:00")
+    tz = fields.Selection(_tz_get, string="Timezone", default='Africa/Addis_Ababa', required=True, help="Reference timezone for attendance calculations. Overrides employee timezone.")
+    lunch_duration = fields.Float(string="Lunch Duration (min)", default=60.0, help="Deducted from total minutes to get working minutes")
     
     # Overtime Rules
     ot_apply = fields.Boolean(string="Apply Overtime", default=False)

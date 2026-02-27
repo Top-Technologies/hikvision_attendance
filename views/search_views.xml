@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <search string="Attendance">
                 <field name="employee_id"/>
+                <field name="department_id"/>
                 <field name="date"/>
                 <separator/>
                 <filter string="Present" name="present" domain="[('attendance_status', '=', 'present')]"/>
@@ -18,6 +19,7 @@
                 <filter string="Early Leave" name="early_leave" domain="[('is_early_leave', '=', True)]"/>
                 <group expand="0" string="Group By">
                     <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Department" name="group_dept" context="{'group_by': 'department_id'}"/>
                     <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
                     <filter string="Attendance" name="group_attendance" context="{'group_by': 'attendance_status'}"/>
                 </group>

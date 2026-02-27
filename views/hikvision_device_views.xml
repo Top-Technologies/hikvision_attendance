@@ -9,8 +9,7 @@
                     <button name="action_test_connection" string="Test Connection" type="object" class="oe_highlight"/>
                     <button name="action_sync_users" string="Sync Users" type="object" class="btn-info"/>
                     <button name="action_assign_badge_ids" string="Assign Badge IDs" type="object" class="btn-secondary"/>
-                    <button name="action_push_employees" string="Push All Employees" type="object" class="btn-primary"/>
-                    <button name="action_push_selected_employees" string="Push Selected" type="object" class="btn-secondary"/>
+                    <button name="action_push_selected_employees" string="Push Selected Employees" type="object" class="btn-primary"/>
                     <button name="action_open_fetch_logs_wizard" string="Fetch Logs" type="object" class="btn-primary"/>
                     <button name="action_start_stream" string="Start Stream" type="object" class="btn-success" invisible="is_streaming"/>
                     <button name="action_stop_stream" string="Stop Stream" type="object" class="btn-danger" invisible="not is_streaming"/>
