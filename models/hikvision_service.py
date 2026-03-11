@@ -81,6 +81,13 @@ class HikvisionService(models.TransientModel):
         # Create session
         try:
              with self._get_session(username, password) as session:
+                # Authenticate session to prevent Hikvision from treating POST 401s as invalid logins
+                try:
+                    auth_url = f"http://{ip}:{port}/ISAPI/System/deviceInfo"
+                    session.get(auth_url, timeout=5)
+                except Exception:
+                    pass
+                
                 session.headers.update({"Content-Type": "application/json"})
                 
                 while has_more:
@@ -147,12 +154,17 @@ class HikvisionService(models.TransientModel):
                         # Parse datetime with timezone handling
                         from dateutil import parser
                         import pytz
+                        from datetime import timedelta
+                        
+                        offset = self.device_id.time_offset if self.sync_mode == 'auto' and self.device_id else 0.0
                         
                         if begin_str:
                             try:
                                 dt = parser.parse(begin_str)
                                 if dt.tzinfo:
                                     dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
+                                if offset:
+                                    dt += timedelta(hours=offset)
                                 vals["begin_time"] = dt
                             except Exception:
                                 pass
@@ -162,6 +174,8 @@ class HikvisionService(models.TransientModel):
                                 dt = parser.parse(end_str)
                                 if dt.tzinfo:
                                     dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
+                                if offset:
+                                    dt += timedelta(hours=offset)
                                 vals["end_time"] = dt
                             except Exception:
                                 pass

@@ -30,6 +30,7 @@
                             <group>
                                 <field name="username"/>
                                 <field name="password" password="True"/>
+                                <field name="time_offset"/>
                                 <field name="is_streaming" readonly="1"/>
                                 <field name="last_heartbeat"/>
                             </group>

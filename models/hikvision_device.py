@@ -29,6 +29,7 @@ class HikvisionDevice(models.Model):
     
     last_heartbeat = fields.Datetime(string='Last Heartbeat', readonly=True)
     is_streaming = fields.Boolean(string='Is Streaming', default=False, tracking=True)
+    time_offset = fields.Float(string='Time Offset (Hours)', default=0.0, help='Adjustment in hours to add to fetched timestamps to align with Odoo time.')
     event_log_ids = fields.One2many('hikvision.event.log', 'device_id', string='Event Logs')
 
     def _get_api_url(self, endpoint):
@@ -42,6 +43,12 @@ class HikvisionDevice(models.Model):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': '*/*'
         })
+        # Authenticate session to prevent Hikvision from treating POST 401s as invalid logins
+        try:
+            url = f"http://{self.ip_address}:{self.port}/ISAPI/System/deviceInfo"
+            session.get(url, timeout=5)
+        except Exception:
+            pass # Ignore connection errors here, they will be raised during the actual request
         return session
 
     def action_test_connection(self):
@@ -258,6 +265,11 @@ class HikvisionDevice(models.Model):
                     dt = parser.parse(time_str)
                     if dt.tzinfo:
                         dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
+                    
+                    # Apply manual time offset if configured
+                    if self.time_offset:
+                        from datetime import timedelta
+                        dt += timedelta(hours=self.time_offset)
                     
                     # Find employee
                     employee = self.env['hr.employee'].search([('barcode', '=', employee_no)], limit=1)
@@ -531,6 +543,11 @@ class HikvisionDevice(models.Model):
                     dt = parser.parse(time_str)
                     if dt.tzinfo:
                         dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
+                    
+                    # Apply manual time offset if configured
+                    if self.time_offset:
+                        from datetime import timedelta
+                        dt += timedelta(hours=self.time_offset)
                     
                     employee = self.env['hr.employee'].search([('barcode', '=', employee_no)], limit=1)
                     if not employee:
@@ -883,6 +900,11 @@ class HikvisionDevice(models.Model):
                 dt = parser.parse(time_str)
                 if dt.tzinfo:
                     dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
+                
+                # Apply manual time offset if configured
+                if self.time_offset:
+                    from datetime import timedelta
+                    dt += timedelta(hours=self.time_offset)
                 
                 employee = self.env['hr.employee'].search([('barcode', '=', employee_no)], limit=1)
                 if not employee:
@@ -1391,6 +1413,11 @@ class HikvisionDevice(models.Model):
             if dt.tzinfo:
                 dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
             
+            # Apply manual time offset if configured
+            if self.time_offset:
+                from datetime import timedelta
+                dt += timedelta(hours=self.time_offset)
+            
             # Find Employee by barcode
             employee = self.env['hr.employee'].search([('barcode', '=', employee_no)], limit=1)
             
@@ -1582,7 +1609,11 @@ class HikvisionDevice(models.Model):
                 # Safer: assume UTC if no tz, or just strip tz if Odoo handles it.
                 # Odoo fields.Datetime expects naive UTC datetime.
                 dt = dt.replace(tzinfo=None) 
-                # TODO: Handle timezone correctly based on device config
+                
+            # Apply manual time offset if configured
+            if self.time_offset:
+                from datetime import timedelta
+                dt += timedelta(hours=self.time_offset)
         except:
             _logger.error(f"Could not parse time: {time_str}")
             return
@@ -1672,9 +1703,30 @@ class HikvisionDevice(models.Model):
             
         HikAttendance = self.env['hikvision.attendance']
         
+        # Get today's local date and current hour for the 6 PM threshold
+        today = fields.Date.context_today(self)
+        now_local = fields.Datetime.context_timestamp(self, datetime.datetime.now())
+        current_hour = now_local.hour
+        
+        # Cleanup today's records if we are before 6 PM and they are empty/absent
+        # This fixes users who are "already absent" during the morning
+        if current_hour < 18:
+            today_absentees = HikAttendance.search([
+                ('date', '=', today),
+                ('first_check_in', '=', False)
+            ])
+            if today_absentees:
+                _logger.info(f"Removing {len(today_absentees)} premature absentee records for {today}")
+                today_absentees.unlink()
+
         # Iterate through date range
         curr_date = start_date
         while curr_date <= end_date:
+            # Shield "Today" or any future Date from being marked as absent before 6 PM (18:00)
+            if curr_date >= today and current_hour < 18:
+                curr_date += timedelta(days=1)
+                continue
+
             # Check for existing records for this date to avoid mass queries
             existing_recs = HikAttendance.search([
                 ('date', '=', curr_date),
