@@ -7,7 +7,19 @@
         <field name="arch" type="xml">
             <form string="Hikvision Service">
                 <group>
-                    <button name="fetch_all_users"
+                    <field name="sync_mode" widget="radio"/>
+                </group>
+                <group invisible="sync_mode != 'auto'">
+                    <field name="device_id" options="{'no_create': True}"/>
+                </group>
+                <group invisible="sync_mode != 'manual'">
+                    <field name="manual_ip"/>
+                    <field name="manual_port"/>
+                    <field name="manual_username"/>
+                    <field name="manual_password" password="True"/>
+                </group>
+                <group>
+                    <button name="action_sync_and_open_users"
                             type="object"
                             string="Sync Device Users"
                             class="oe_highlight"/>
@@ -16,18 +28,4 @@
         </field>
     </record>
 
-    <!-- ACTION TO OPEN SERVICE FORM -->
-    <record id="action_hikvision_service" model="ir.actions.act_window">
-        <field name="name">Sync Device Users</field>
-        <field name="res_model">hikvision.service</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-    </record>
-
-    <!-- MENU ITEM -->
-    <menuitem id="menu_hikvision_service_sync"
-              name="Sync Device Users"
-              parent="menu_hikvision_root"
-              action="action_hikvision_service"
-              sequence="3"/>
 </odoo>

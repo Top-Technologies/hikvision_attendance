@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_hikvision_user_tree" model="ir.ui.view">
-        <field name="name">hikvision.user.tree</field>
+    <record id="view_hikvision_user_list" model="ir.ui.view">
+        <field name="name">hikvision.user.list</field>
         <field name="model">hikvision.user</field>
         <field name="arch" type="xml">
-            <tree string="Hikvision Users">
+            <list string="Hikvision Users">
                 <field name="employee_id"/>
                 <field name="name"/>
                 <field name="odoo_employee_id"/>
-            </tree>
+            </list>
         </field>
     </record>
 

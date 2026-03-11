@@ -8,6 +8,7 @@
             <xpath expr="//page[@name='hr_settings']" position="inside">
                 <group string="Hikvision Attendance" name="hikvision_attendance">
                     <field name="attendance_policy_id"/>
+                    <field name="department_id" readonly="1"/>
                 </group>
             </xpath>
         </field>

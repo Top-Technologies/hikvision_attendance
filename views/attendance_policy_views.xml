@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_hikvision_work_policy_tree" model="ir.ui.view">
-        <field name="name">hikvision.work.policy.tree</field>
+    <record id="view_hikvision_work_policy_list" model="ir.ui.view">
+        <field name="name">hikvision.work.policy.list</field>
         <field name="model">hikvision.work.policy</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name"/>
                 <field name="work_start" widget="float_time"/>
                 <field name="work_end" widget="float_time"/>
                 <field name="late_tolerance"/>
                 <field name="ot_apply"/>
                 <field name="ignore_late_early"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -29,6 +29,9 @@
                         <group string="Work Schedule">
                             <field name="work_start" widget="float_time"/>
                             <field name="work_end" widget="float_time"/>
+                            <field name="work_end_saturday" widget="float_time"/>
+                            <field name="tz"/>
+                            <field name="lunch_duration"/>
                             <field name="ignore_late_early"/>
                         </group>
                         <group string="Tolerances">
@@ -64,9 +67,4 @@
         </field>
     </record>
 
-    <record id="action_hikvision_work_policy" model="ir.actions.act_window">
-        <field name="name">Work Policies</field>
-        <field name="res_model">hikvision.work.policy</field>
-        <field name="view_mode">tree,form</field>
-    </record>
 </odoo>

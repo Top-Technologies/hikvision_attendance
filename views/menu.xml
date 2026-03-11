@@ -1,42 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Root Menu -->
+    <record id="menu_hikvision_root" model="ir.ui.menu">
+        <field name="name">Hikvision Attendance</field>
+        <field name="sequence" eval="10"/>
+        <field name="web_icon">hikvision_attendance,static/description/icon.png</field>
+    </record>
 
-    <menuitem id="menu_hikvision_root"
-              name="Hikvision Attendance"
-              sequence="10"/>
+    <!-- Main Menus -->
+    <record id="menu_hikvision_attendance" model="ir.ui.menu">
+        <field name="name">Attendance Records</field>
+        <field name="parent_id" ref="menu_hikvision_root"/>
+        <field name="action" ref="action_hikvision_attendance"/>
+        <field name="sequence" eval="1"/>
+    </record>
 
-    <menuitem id="menu_hikvision_attendance"
-              parent="menu_hikvision_root"
-              name="Attendance Records"
-              action="action_hikvision_attendance"
-              sequence="1"/>
+    <record id="menu_hikvision_employee_profile" model="ir.ui.menu">
+        <field name="name">Employee Profiles</field>
+        <field name="parent_id" ref="menu_hikvision_root"/>
+        <field name="action" ref="action_hikvision_employee_profile"/>
+        <field name="groups_id" eval="[(4, ref('hikvision_attendance.group_hikvision_hr'))]"/>
+        <field name="sequence" eval="2"/>
+    </record>
 
-    <menuitem id="menu_hikvision_employee_profile"
-              parent="menu_hikvision_root"
-              name="Employee Profiles"
-              action="action_hikvision_employee_profile"
-              sequence="2"/>
+    <record id="menu_hikvision_users" model="ir.ui.menu">
+        <field name="name">Device Users</field>
+        <field name="parent_id" ref="menu_hikvision_root"/>
+        <field name="action" ref="action_hikvision_user_list"/>
+        <field name="groups_id" eval="[(4, ref('hikvision_attendance.group_hikvision_hr'))]"/>
+        <field name="sequence" eval="3"/>
+    </record>
 
-    <menuitem id="menu_hikvision_user_list"
-              parent="menu_hikvision_root"
-              name="User List"
-              action="action_hikvision_user_list"
-              sequence="3"/>
+    <record id="menu_hikvision_analytics" model="ir.ui.menu">
+        <field name="name">Analytics</field>
+        <field name="parent_id" ref="menu_hikvision_root"/>
+        <field name="action" ref="action_hikvision_analytics"/>
+        <field name="groups_id" eval="[(4, ref('hikvision_attendance.group_hikvision_hr'))]"/>
+        <field name="sequence" eval="0"/>
+    </record>
 
-    <menuitem id="menu_hikvision_configuration"
-              parent="menu_hikvision_root"
-              name="Configuration"
-              sequence="100"/>
+    <record id="menu_hikvision_event_log" model="ir.ui.menu">
+        <field name="name">Live Events</field>
+        <field name="parent_id" ref="menu_hikvision_root"/>
+        <field name="action" ref="action_hikvision_event_log"/>
+        <field name="groups_id" eval="[(4, ref('hikvision_attendance.group_hikvision_hr'))]"/>
+        <field name="sequence" eval="5"/>
+    </record>
 
-    <menuitem id="menu_hikvision_device"
-              parent="menu_hikvision_configuration"
-              name="Devices"
-              action="action_hikvision_device"
-              sequence="1"/>
+    <!-- Configuration Menu -->
+    <record id="menu_hikvision_configuration" model="ir.ui.menu">
+        <field name="name">Configuration</field>
+        <field name="parent_id" ref="menu_hikvision_root"/>
+        <field name="groups_id" eval="[(4, ref('hikvision_attendance.group_hikvision_hr'))]"/>
+        <field name="sequence" eval="100"/>
+    </record>
 
-    <menuitem id="menu_hikvision_work_policy"
-              parent="menu_hikvision_configuration"
-              name="Work Policies"
-              action="action_hikvision_work_policy"
-              sequence="2"/>
+    <record id="menu_hikvision_device" model="ir.ui.menu">
+        <field name="name">Devices</field>
+        <field name="parent_id" ref="menu_hikvision_configuration"/>
+        <field name="action" ref="action_hikvision_device"/>
+        <field name="sequence" eval="1"/>
+    </record>
+
+    <record id="menu_hikvision_service_sync" model="ir.ui.menu">
+        <field name="name">Sync Device Users</field>
+        <field name="parent_id" ref="menu_hikvision_configuration"/>
+        <field name="action" ref="action_hikvision_service"/>
+        <field name="sequence" eval="1.5"/>
+    </record>
+
+    <record id="menu_hikvision_work_policy" model="ir.ui.menu">
+        <field name="name">Work Policies</field>
+        <field name="parent_id" ref="menu_hikvision_configuration"/>
+        <field name="action" ref="action_hikvision_work_policy"/>
+        <field name="sequence" eval="2"/>
+    </record>
 
 </odoo>

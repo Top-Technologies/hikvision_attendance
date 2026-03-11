@@ -19,6 +19,17 @@ class FetchLogsWizard(models.TransientModel):
     
     start_date = fields.Date(string='Start Date')
     end_date = fields.Date(string='End Date')
+    
+    use_chunking = fields.Boolean(
+        string='Use Chunked Fetching',
+        default=True,
+        help='Split large date ranges into smaller chunks to prevent 401 errors and ensure complete data retrieval. Recommended for date ranges larger than 7 days.'
+    )
+    chunk_days = fields.Integer(
+        string='Days per Chunk',
+        default=7,
+        help='Number of days to fetch in each chunk. Smaller values are more reliable but slower.'
+    )
 
     @api.onchange('date_range')
     def _onchange_date_range(self):
@@ -57,4 +68,12 @@ class FetchLogsWizard(models.TransientModel):
         if self.start_date > self.end_date:
             raise UserError(_("Start date cannot be after end date."))
         
-        return self.device_id.action_fetch_logs_by_date(self.start_date, self.end_date)
+        # Use chunked fetching if enabled
+        if self.use_chunking:
+            return self.device_id.action_fetch_logs_chunked(
+                self.start_date, 
+                self.end_date, 
+                chunk_days=self.chunk_days
+            )
+        else:
+            return self.device_id.action_fetch_logs_by_date(self.start_date, self.end_date)

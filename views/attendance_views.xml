@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <!-- Tree view for Attendance -->
-    <record id="view_hikvision_attendance_tree" model="ir.ui.view">
-        <field name="name">hikvision.attendance.tree</field>
+    <record id="view_hikvision_attendance_list" model="ir.ui.view">
+        <field name="name">hikvision.attendance.list</field>
         <field name="model">hikvision.attendance</field>
         <field name="arch" type="xml">
-            <tree string="Attendance Records" decoration-danger="attendance_status == 'absent'" decoration-warning="attendance_status == 'incomplete'" decoration-success="attendance_status == 'present'">
+            <list string="Attendance Records" decoration-danger="attendance_status == 'absent'" decoration-warning="attendance_status == 'incomplete'" decoration-success="attendance_status == 'present'">
                 <field name="employee_id"/>
+                <field name="department_id" optional="show"/>
                 <field name="date"/>
                 <field name="attendance_status" widget="badge" decoration-success="attendance_status == 'present'" decoration-warning="attendance_status == 'incomplete'" decoration-danger="attendance_status == 'absent'"/>
                 <field name="first_check_in"/>
                 <field name="last_check_out"/>
-                <field name="total_hours" widget="float_time"/>
-                <field name="is_late" invisible="1"/>
-                <field name="is_early_leave" invisible="1"/>
+                <field name="working_minutes" string="Work Minutes"/>
+                <field name="is_late" widget="boolean_toggle"/>
+                <field name="is_early_leave" widget="boolean_toggle"/>
                 <field name="late_minutes" string="Late (min)" optional="show"/>
                 <field name="early_leave_minutes" string="Early (min)" optional="show"/>
                 <field name="overtime_hours" widget="float_time" optional="show"/>
                 <field name="approval_state" widget="badge" decoration-success="approval_state == 'approved'" decoration-warning="approval_state in ('to_approve', 'second_approval')" optional="show"/>
                 <field name="status" widget="badge" decoration-info="status == 'in'" decoration-success="status == 'out'" optional="hide"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -31,6 +32,7 @@
             <form string="Attendance Record">
                 <header>
                     <button name="action_submit_ot" string="Submit OT" type="object" class="oe_highlight" invisible="approval_state != 'draft' or overtime_hours == 0"/>
+                    <button name="action_manual_request" string="Claim Overtime" type="object" class="oe_highlight" invisible="approval_state != 'draft'"/>
                     <button name="action_first_approve" string="Approve (Manager)" type="object" class="oe_highlight" invisible="approval_state != 'to_approve'" groups="hikvision_attendance.group_hikvision_hr"/>
                     <button name="action_second_approve" string="Approve (HR)" type="object" class="oe_highlight" invisible="approval_state != 'second_approval'" groups="hikvision_attendance.group_hikvision_hr"/>
                     <button name="action_refuse_ot" string="Refuse" type="object" invisible="approval_state not in ('to_approve', 'second_approval')" groups="hikvision_attendance.group_hikvision_hr"/>
@@ -50,14 +52,16 @@
                     <widget name="web_ribbon" title="Absent" bg_color="text-bg-danger" invisible="attendance_status != 'absent'"/>
                     <group>
                         <group>
-                            <field name="employee_id"/>
-                            <field name="date"/>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="department_id" readonly="1"/>
+                            <field name="date" readonly="1"/>
                             <field name="attendance_status"/>
                         </group>
                         <group>
                             <field name="first_check_in"/>
                             <field name="last_check_out"/>
-                            <field name="total_hours" widget="float_time"/>
+                            <field name="working_minutes" string="Working Minutes (480 = 8 hrs)"/>
+                            <field name="total_hours" widget="float_time" string="Total Hours (incl. lunch)"/>
                         </group>
                     </group>
                     <group string="Attendance Status">
@@ -75,9 +79,14 @@
                             <field name="overtime_hours" widget="float_time" decoration-bf="1"/>
                             <field name="ot_payable_hours" widget="float_time" decoration-success="1" help="Calculated based on policy rates"/>
                         </group>
+                        <group string="Manual Request" invisible="approval_state != 'draft' and manual_overtime == 0">
+                            <field name="manual_overtime" widget="float_time"/>
+                            <field name="request_reason"/>
+                        </group>
                         <group string="Approval Context">
                              <field name="ot_weekly_total" widget="float_time"/>
                              <field name="ot_monthly_total" widget="float_time"/>
+                             <field name="approver_ids" widget="many2many_tags" groups="hikvision_attendance.group_hikvision_hr,hikvision_attendance.group_hikvision_admin"/>
                         </group>
                     </group>
                 </sheet>
@@ -85,39 +94,8 @@
         </field>
     </record>
 
-    <!-- Search view -->
-    <record id="view_hikvision_attendance_search" model="ir.ui.view">
-        <field name="name">hikvision.attendance.search</field>
-        <field name="model">hikvision.attendance</field>
-        <field name="arch" type="xml">
-            <search string="Attendance">
-                <field name="employee_id"/>
-                <field name="date"/>
-                <filter string="Today" name="today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
-                <filter string="This Week" name="week" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
-                <separator/>
-                <filter string="Present" name="present" domain="[('attendance_status', '=', 'present')]"/>
-                <filter string="Incomplete" name="incomplete" domain="[('attendance_status', '=', 'incomplete')]"/>
-                <filter string="Absent" name="absent" domain="[('attendance_status', '=', 'absent')]"/>
-                <separator/>
-                <filter string="Late" name="late" domain="[('is_late', '=', True)]"/>
-                <filter string="Early Leave" name="early_leave" domain="[('is_early_leave', '=', True)]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
-                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
-                    <filter string="Attendance" name="group_attendance" context="{'group_by': 'attendance_status'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
 
-    <!-- Action -->
-    <record id="action_hikvision_attendance" model="ir.actions.act_window">
-        <field name="name">Attendance</field>
-        <field name="res_model">hikvision.attendance</field>
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="view_hikvision_attendance_search"/>
-        <field name="context">{'search_default_today': 1}</field>
-    </record>
+
+
 </odoo>
 

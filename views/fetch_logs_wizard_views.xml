@@ -25,6 +25,13 @@
                         <field name="end_date" readonly="1"/>
                     </group>
                 </group>
+                <group string="Advanced Options" invisible="1">
+                    <field name="use_chunking" invisible="1"/>
+                    <field name="chunk_days" invisible="1"/>
+                </group>
+                <div class="alert alert-info" role="alert" invisible="1">
+                    <strong>Chunked Fetching Enabled:</strong> Large date ranges will be split into smaller chunks to prevent authentication errors and ensure complete data retrieval.
+                </div>
                 <footer>
                     <button name="action_fetch_logs" string="Fetch Logs" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>

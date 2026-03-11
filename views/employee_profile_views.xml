@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <!-- Tree View - Employee Profiles -->
-    <record id="view_hikvision_employee_profile_tree" model="ir.ui.view">
-        <field name="name">hikvision.employee.profile.tree</field>
+    <record id="view_hikvision_employee_profile_list" model="ir.ui.view">
+        <field name="name">hikvision.employee.profile.list</field>
         <field name="model">hikvision.employee.profile</field>
         <field name="arch" type="xml">
-            <tree string="Employee Profiles">
+            <list string="Employee Profiles">
                 <field name="employee_name"/>
                 <field name="department_id"/>
                 <field name="job_id"/>
@@ -17,7 +17,7 @@
                 <field name="early_leave_days" string="Early"/>
                 <field name="absent_days" string="Absent"/>
                 <field name="avg_daily_hours" widget="float_time" string="Avg/Day"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -110,34 +110,6 @@
         </field>
     </record>
 
-    <!-- Search View -->
-    <record id="view_hikvision_employee_profile_search" model="ir.ui.view">
-        <field name="name">hikvision.employee.profile.search</field>
-        <field name="model">hikvision.employee.profile</field>
-        <field name="arch" type="xml">
-            <search string="Employee Profiles">
-                <field name="employee_name"/>
-                <field name="department_id"/>
-                <field name="job_id"/>
-                <separator/>
-                <filter string="Late This Month" name="late" domain="[('late_days', '>', 0)]"/>
-                <filter string="Has Early Leave" name="early" domain="[('early_leave_days', '>', 0)]"/>
-                <filter string="Has Incomplete" name="incomplete" domain="[('incomplete_days', '>', 0)]"/>
-                <filter string="Has Absences" name="absent" domain="[('absent_days', '>', 0)]"/>
-                <filter string="Perfect Attendance" name="perfect" domain="[('absent_days', '=', 0), ('late_days', '=', 0), ('early_leave_days', '=', 0)]"/>
-                <separator/>
-                <group expand="0" string="Group By">
-                    <filter string="Department" name="group_dept" context="{'group_by': 'department_id'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
 
-    <!-- Action -->
-    <record id="action_hikvision_employee_profile" model="ir.actions.act_window">
-        <field name="name">Employee Profiles</field>
-        <field name="res_model">hikvision.employee.profile</field>
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="view_hikvision_employee_profile_search"/>
-    </record>
+
 </odoo>

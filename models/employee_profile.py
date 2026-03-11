@@ -183,7 +183,7 @@ class HikvisionEmployeeProfile(models.Model):
             'name': f'Attendance - {self.employee_name}',
             'type': 'ir.actions.act_window',
             'res_model': 'hikvision.attendance',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('employee_id', '=', self.employee_id.id)],
             'context': {'default_employee_id': self.employee_id.id},
         }
@@ -195,7 +195,7 @@ class HikvisionEmployeeProfile(models.Model):
             'name': f'Late Arrivals - {self.employee_name}',
             'type': 'ir.actions.act_window',
             'res_model': 'hikvision.attendance',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('employee_id', '=', self.employee_id.id), ('is_late', '=', True)],
         }
 
@@ -206,7 +206,7 @@ class HikvisionEmployeeProfile(models.Model):
             'name': f'Absences - {self.employee_name}',
             'type': 'ir.actions.act_window',
             'res_model': 'hikvision.attendance',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('employee_id', '=', self.employee_id.id), ('attendance_status', '=', 'absent')],
         }
 
@@ -217,6 +217,6 @@ class HikvisionEmployeeProfile(models.Model):
             'name': f'Early Leaves - {self.employee_name}',
             'type': 'ir.actions.act_window',
             'res_model': 'hikvision.attendance',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': [('employee_id', '=', self.employee_id.id), ('is_early_leave', '=', True)],
         }
