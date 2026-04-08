@@ -11,6 +11,7 @@ class HikvisionEventLog(models.Model):
     event_type = fields.Char(string="Event Type")
     employee_no = fields.Char(string="Employee No")
     employee_id = fields.Many2one('hr.employee', string="Employee")
+    company_id = fields.Many2one('res.company', string='Company', related='employee_id.company_id', store=True)
     raw_data = fields.Text(string="Raw Data")
     
     # Computed fields for filtering

@@ -7,6 +7,7 @@ class HikvisionWorkPolicy(models.Model):
     _description = 'Work & Attendance Policy'
 
     name = fields.Char(string="Policy Name", required=True)
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     
     # Work Schedule
     work_start = fields.Float(string="Work Start Time", default=8.5, help="e.g. 8.5 for 08:30")

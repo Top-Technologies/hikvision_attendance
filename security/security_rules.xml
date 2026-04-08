@@ -13,11 +13,54 @@
             <field name="perm_unlink" eval="0"/>
         </record>
 
-        <!-- HR/Admin Rule: See all -->
-        <record id="hikvision_attendance_rule_hr_admin" model="ir.rule">
-            <field name="name">Hikvision Attendance: HR and Admin</field>
-            <field name="model_id" ref="model_hikvision_attendance"/>
+        <!-- Device Company Rule (Disabled) -->
+        <record id="hikvision_device_rule_company" model="ir.rule">
+            <field name="name">Hikvision Device Multi-Company</field>
+            <field name="model_id" ref="model_hikvision_device"/>
             <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="active" eval="False"/>
+        </record>
+
+        <!-- Attendance Company Rule -->
+        <record id="hikvision_attendance_rule_company" model="ir.rule">
+            <field name="name">Hikvision Attendance Multi-Company</field>
+            <field name="model_id" ref="model_hikvision_attendance"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- Event Log Company Rule -->
+        <record id="hikvision_event_log_rule_company" model="ir.rule">
+            <field name="name">Hikvision Event Log Multi-Company</field>
+            <field name="model_id" ref="model_hikvision_event_log"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- Employee Profile SQL View Company Rule -->
+        <record id="hikvision_employee_profile_rule_company" model="ir.rule">
+            <field name="name">Hikvision Employee Profile Multi-Company</field>
+            <field name="model_id" ref="model_hikvision_employee_profile"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- Work Policy Company Rule -->
+        <record id="hikvision_work_policy_rule_company" model="ir.rule">
+            <field name="name">Hikvision Work Policy Multi-Company</field>
+            <field name="model_id" ref="model_hikvision_work_policy"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- Synced User Company Rule -->
+        <record id="hikvision_user_rule_company" model="ir.rule">
+            <field name="name">Hikvision Synced User Multi-Company</field>
+            <field name="model_id" ref="model_hikvision_user"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- HR/Admin Rule: Can manage all records within their company -->
+        <record id="hikvision_attendance_rule_hr_admin" model="ir.rule">
+            <field name="name">Hikvision Attendance: HR and Admin (Company Only)</field>
+            <field name="model_id" ref="model_hikvision_attendance"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
             <field name="groups" eval="[(4, ref('hikvision_attendance.group_hikvision_hr')), (4, ref('hikvision_attendance.group_hikvision_admin'))]"/>
             <field name="perm_read" eval="1"/>
             <field name="perm_write" eval="1"/>

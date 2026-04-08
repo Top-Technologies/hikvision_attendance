@@ -31,6 +31,7 @@ class HikvisionDevice(models.Model):
     is_streaming = fields.Boolean(string='Is Streaming', default=False, tracking=True)
     time_offset = fields.Float(string='Time Offset (Hours)', default=0.0, help='Adjustment in hours to add to fetched timestamps to align with Odoo time.')
     event_log_ids = fields.One2many('hikvision.event.log', 'device_id', string='Event Logs')
+    event_log_ids = fields.One2many('hikvision.event.log', 'device_id', string='Event Logs')
 
     def _get_api_url(self, endpoint):
         return f"http://{self.ip_address}:{self.port}/{endpoint}"
@@ -358,6 +359,7 @@ class HikvisionDevice(models.Model):
             'target': 'new',
             'context': {
                 'default_device_id': self.id,
+                'hide_device': True,
             },
         }
 
@@ -549,11 +551,11 @@ class HikvisionDevice(models.Model):
                         from datetime import timedelta
                         dt += timedelta(hours=self.time_offset)
                     
-                    employee = self.env['hr.employee'].search([('barcode', '=', employee_no)], limit=1)
+                    employee = self.env['hr.employee'].sudo().search([('barcode', '=', employee_no)], limit=1)
                     if not employee:
-                        hik_user = self.env['hikvision.user'].search([('employee_id', '=', employee_no)], limit=1)
+                        hik_user = self.env['hikvision.user'].sudo().search([('employee_id', '=', employee_no)], limit=1)
                         if hik_user and hik_user.odoo_employee_id:
-                            employee = hik_user.odoo_employee_id
+                            employee = hik_user.odoo_employee_id.sudo()
                     
                     if not employee:
                         if employee_no not in skipped_no_employee:
@@ -906,11 +908,11 @@ class HikvisionDevice(models.Model):
                     from datetime import timedelta
                     dt += timedelta(hours=self.time_offset)
                 
-                employee = self.env['hr.employee'].search([('barcode', '=', employee_no)], limit=1)
+                employee = self.env['hr.employee'].sudo().search([('barcode', '=', employee_no)], limit=1)
                 if not employee:
-                    hik_user = self.env['hikvision.user'].search([('employee_id', '=', employee_no)], limit=1)
+                    hik_user = self.env['hikvision.user'].sudo().search([('employee_id', '=', employee_no)], limit=1)
                     if hik_user and hik_user.odoo_employee_id:
-                        employee = hik_user.odoo_employee_id
+                        employee = hik_user.odoo_employee_id.sudo()
                 
                 if not employee:
                     if employee_no not in skipped_employees:
@@ -1693,7 +1695,7 @@ class HikvisionDevice(models.Model):
         from datetime import timedelta
         
         # Get all active employees who belong to a Work Policy (meaning they are tracked)
-        employees = self.env['hr.employee'].search([
+        employees = self.env['hr.employee'].sudo().search([
             ('active', '=', True),
             ('attendance_policy_id', '!=', False)
         ])
@@ -1711,7 +1713,7 @@ class HikvisionDevice(models.Model):
         # Cleanup today's records if we are before 6 PM and they are empty/absent
         # This fixes users who are "already absent" during the morning
         if current_hour < 18:
-            today_absentees = HikAttendance.search([
+            today_absentees = HikAttendance.sudo().search([
                 ('date', '=', today),
                 ('first_check_in', '=', False)
             ])

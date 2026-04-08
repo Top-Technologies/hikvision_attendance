@@ -24,6 +24,7 @@
                     <group col="2">
                         <group string="Configuration">
                             <group>
+
                                 <field name="ip_address"/>
                                 <field name="port"/>
                             </group>
@@ -48,6 +49,7 @@
         <field name="arch" type="xml">
             <list string="Hikvision Devices">
                 <field name="name"/>
+
                 <field name="ip_address"/>
                 <field name="status" widget="badge" decoration-success="status == 'connected'" decoration-danger="status == 'error'" decoration-muted="status == 'disconnected'"/>
                 <field name="is_streaming"/>

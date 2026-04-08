@@ -1,10 +1,10 @@
 {
-    'name': 'HAIK',
+    'name': 'Haikvision Attendance Machine',
     'version': '1.1',
     'category': 'Human Resources',
     'summary': 'Live Hikvision Attendance Sync with Odoo',
     'license': 'LGPL-3',
-    'author': 'Mike',
+    'author': 'TopTechnology',
     'depends': [
         'base',
         'web',

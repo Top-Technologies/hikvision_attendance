@@ -12,6 +12,7 @@ class HikvisionEmployeeProfile(models.Model):
     employee_name = fields.Char(string="Name", readonly=True)
     department_id = fields.Many2one('hr.department', string="Department", readonly=True)
     job_id = fields.Many2one('hr.job', string="Job Position", readonly=True)
+    company_id = fields.Many2one('res.company', string="Company", readonly=True)
     
     # Work hours - Current Period
     today_hours = fields.Float(string="Today", readonly=True)
@@ -48,6 +49,7 @@ class HikvisionEmployeeProfile(models.Model):
                     e.name as employee_name,
                     e.department_id as department_id,
                     e.job_id as job_id,
+                    e.company_id as company_id,
                     
                     -- Today's hours
                     COALESCE((

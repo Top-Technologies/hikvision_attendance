@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <!-- Global Fetch Records Action -->
+    <record id="action_fetch_attendance_wizard" model="ir.actions.act_window">
+        <field name="name">Fetch Records</field>
+        <field name="res_model">hikvision.fetch.logs.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
     <!-- Tree view for Attendance -->
     <record id="view_hikvision_attendance_list" model="ir.ui.view">
         <field name="name">hikvision.attendance.list</field>
         <field name="model">hikvision.attendance</field>
         <field name="arch" type="xml">
-            <list string="Attendance Records" decoration-danger="attendance_status == 'absent'" decoration-warning="attendance_status == 'incomplete'" decoration-success="attendance_status == 'present'">
+            <list string="Attendance Records" create="0" decoration-danger="attendance_status == 'absent'" decoration-warning="attendance_status == 'incomplete'" decoration-success="attendance_status == 'present'">
+                <header>
+                    <button name="%(hikvision_attendance.action_fetch_attendance_wizard)d" string="Fetch Records" type="action" class="btn-primary" display="always"/>
+                </header>
                 <field name="employee_id"/>
                 <field name="department_id" optional="show"/>
                 <field name="date"/>
@@ -29,7 +40,7 @@
         <field name="name">hikvision.attendance.form</field>
         <field name="model">hikvision.attendance</field>
         <field name="arch" type="xml">
-            <form string="Attendance Record">
+            <form string="Attendance Record" create="0">
                 <header>
                     <button name="action_submit_ot" string="Submit OT" type="object" class="oe_highlight" invisible="approval_state != 'draft' or overtime_hours == 0"/>
                     <button name="action_manual_request" string="Claim Overtime" type="object" class="oe_highlight" invisible="approval_state != 'draft'"/>

@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <form string="Fetch Logs">
                 <group>
-                    <field name="device_id" invisible="1"/>
+                    <field name="device_id" invisible="context.get('hide_device', False)" options="{'no_create': True}"/>
                     <field name="date_range" widget="radio"/>
                 </group>
                 <group invisible="date_range != 'custom'">
@@ -38,5 +38,13 @@
                 </footer>
             </form>
         </field>
+    </record>
+
+    <!-- Global Fetch Records Action -->
+    <record id="action_fetch_attendance_wizard" model="ir.actions.act_window">
+        <field name="name">Fetch Records</field>
+        <field name="res_model">hikvision.fetch.logs.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
     </record>
 </odoo>

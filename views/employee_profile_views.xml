@@ -5,7 +5,7 @@
         <field name="name">hikvision.employee.profile.list</field>
         <field name="model">hikvision.employee.profile</field>
         <field name="arch" type="xml">
-            <list string="Employee Profiles">
+            <list string="Employee Profiles" create="0" edit="0">
                 <field name="employee_name"/>
                 <field name="department_id"/>
                 <field name="job_id"/>
@@ -26,7 +26,7 @@
         <field name="name">hikvision.employee.profile.form</field>
         <field name="model">hikvision.employee.profile</field>
         <field name="arch" type="xml">
-            <form string="Employee Attendance Profile" create="false" edit="false">
+            <form string="Employee Attendance Profile" create="0" edit="0">
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_attendance" type="object" class="oe_stat_button" icon="fa-calendar">

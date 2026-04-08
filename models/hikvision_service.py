@@ -19,6 +19,7 @@ class HikvisionUser(models.Model):
     employee_no = fields.Char(string="Employee No", related='employee_id', store=False)  # Alias for compatibility
     name = fields.Char(string="Name")
     odoo_employee_id = fields.Many2one('hr.employee', string="Odoo Employee")
+    company_id = fields.Many2one('res.company', string='Company', related='odoo_employee_id.company_id', store=True)
     begin_time = fields.Datetime(string="Begin Time")
     end_time = fields.Datetime(string="End Time")
 
