@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hikvision_dashboard_form" model="ir.ui.view">
+        <field name="name">hikvision.dashboard.form</field>
+        <field name="model">hikvision.attendance.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Dashboard" create="false" edit="false" delete="false">
+                <sheet>
+                    <div class="container-fluid">
+                        <div class="row text-center mb-5 mt-3">
+                            <div class="col-12">
+                                <h1 class="fw-bold text-dark" style="color: #2f4f4f; font-size: 2.5rem;">Attendance Analytics 2026</h1>
+                                <p class="text-muted">Real-time Data Snapshot</p>
+                            </div>
+                        </div>
+                        
+                        <!-- ROW 1: Top Metrics Cards -->
+                        <div class="row g-4 mb-5">
+                            <!-- Card 1: Total Employees -->
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm" style="border-top: 5px solid #2e8b57; border-radius: 8px; background-color: #ffffff;">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <span class="rounded-circle p-3 d-inline-block" style="background-color: #e6f4ea;">
+                                                <i class="fa fa-clipboard-list fa-2x" style="color: #2e8b57;"></i>
+                                            </span>
+                                        </div>
+                                        <h6 class="text-uppercase text-muted fw-bold mb-2">Total Employees</h6>
+                                        <h1 class="display-4 fw-bold text-dark mb-0"><field name="total_employees"/></h1>
+                                        <div class="mt-2 text-muted small">Active Workforce</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 2: Attendance Rate -->
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm" style="border-top: 5px solid #2e8b57; border-radius: 8px; background-color: #ffffff;">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <span class="rounded-circle p-3 d-inline-block" style="background-color: #e6f4ea;">
+                                                <i class="fa fa-user-check fa-2x" style="color: #2e8b57;"></i>
+                                            </span>
+                                        </div>
+                                        <h6 class="text-uppercase text-muted fw-bold mb-2">Attendance Rate (Today)</h6>
+                                        <h1 class="display-4 fw-bold text-dark mb-0">
+                                            <field name="attendance_rate" widget="float" options="{'precision': 1}"/>%
+                                        </h1>
+                                        <div class="mt-2 text-muted small">
+                                            <field name="present_today"/> Present / <field name="active_employees"/> Active
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card 3: Late Rate -->
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm" style="border-top: 5px solid #2e8b57; border-radius: 8px; background-color: #ffffff;">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <span class="rounded-circle p-3 d-inline-block" style="background-color: #e6f4ea;">
+                                                <i class="fa fa-user-clock fa-2x" style="color: #2e8b57;"></i>
+                                            </span>
+                                        </div>
+                                        <h6 class="text-uppercase text-muted fw-bold mb-2">Late Rate (Today)</h6>
+                                        <h1 class="display-4 fw-bold text-dark mb-0">
+                                            <field name="late_rate" widget="float" options="{'precision': 2}"/>%
+                                        </h1>
+                                        <div class="mt-2 text-muted small">
+                                            <field name="late_today"/> Late Arrivals
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROW 2: Department Highlights -->
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm bg-white">
+                                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                                        <h5 class="fw-bold mb-0" style="color: #2f4f4f;">🏆 Department Performance</h5>
+                                    </div>
+                                    <div class="card-body px-4 pb-4">
+                                        <div class="row g-3 align-items-center mt-2">
+                                            <div class="col-12">
+                                                <div class="d-flex align-items-center p-3 rounded mb-3" style="background-color: #f0fdf4;">
+                                                    <div class="me-3 display-6">👏</div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="fw-bold mb-0 text-success">Most Punctual Department</h6>
+                                                        <div class="text-dark fw-bold fs-4"><field name="top_dept_present"/></div>
+                                                    </div> 
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="d-flex align-items-center p-3 rounded" style="background-color: #fef2f2;">
+                                                    <div class="me-3 display-6">⚠️</div>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="fw-bold mb-0 text-danger">Most Late Department</h6>
+                                                        <div class="text-dark fw-bold fs-4"><field name="top_dept_late"/></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4 text-end">
+                                            <button name="action_view_on_time" type="object" class="btn btn-sm btn-outline-success me-2">View On-Time Staff</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm bg-white">
+                                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                                        <h5 class="fw-bold mb-0" style="color: #2f4f4f;">⚡ Quick Actions</h5>
+                                    </div>
+                                    <div class="card-body px-4 pb-4">
+                                        <div class="d-grid gap-3">
+                                            <button name="action_view_present" type="object" class="btn btn-outline-secondary d-flex justify-content-between align-items-center p-3">
+                                                <span><i class="fa fa-check-circle text-success me-2"></i> Who is Present?</span>
+                                                <span class="badge bg-success rounded-pill"><field name="present_today"/></span>
+                                            </button>
+                                            <button name="action_view_absent" type="object" class="btn btn-outline-secondary d-flex justify-content-between align-items-center p-3">
+                                                <span><i class="fa fa-times-circle text-danger me-2"></i> Who is Absent?</span>
+                                                <span class="badge bg-danger rounded-pill"><field name="absent_today"/></span>
+                                            </button>
+                                            <button name="action_view_late" type="object" class="btn btn-outline-secondary d-flex justify-content-between align-items-center p-3">
+                                                <span><i class="fa fa-exclamation-triangle text-warning me-2"></i> Who is Late?</span>
+                                                <span class="badge bg-warning text-dark rounded-pill"><field name="late_today"/></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROW 3: Comparison Bars -->
+                        <div class="row g-4">
+                            <!-- Attendance Comparison -->
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm bg-white">
+                                    <div class="card-body p-4">
+                                        <h6 class="fw-bold mb-4" style="color: #2f4f4f;">Attendance % - Current vs Past Week</h6>
+                                        
+                                        <!-- Past Week -->
+                                        <div class="mb-4">
+                                            <div class="d-flex justify-content-between mb-1 small text-muted">
+                                                <span>Past Week</span>
+                                                <span><field name="attendance_last_week" widget="float" options="{'precision': 1}"/>%</span>
+                                            </div>
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: 50%; background-color: #2f4f4f;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Current Week -->
+                                        <div class="mb-2">
+                                            <div class="d-flex justify-content-between mb-1 small text-muted">
+                                                <span>Current Week</span>
+                                                <span><field name="attendance_this_week" widget="float" options="{'precision': 1}"/>%</span>
+                                            </div>
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: 60%; background-color: #e9967a;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Late Comparison -->
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm bg-white">
+                                    <div class="card-body p-4">
+                                        <h6 class="fw-bold mb-4" style="color: #2f4f4f;">Late Arrivals - Current vs Past Week</h6>
+                                        
+                                        <!-- Past Week -->
+                                        <div class="mb-4">
+                                            <div class="d-flex justify-content-between mb-1 small text-muted">
+                                                <span>Past Week</span>
+                                                <span><field name="late_last_week"/> Late</span>
+                                            </div>
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: 40%; background-color: #2f4f4f;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Current Week -->
+                                        <div class="mb-2">
+                                            <div class="d-flex justify-content-between mb-1 small text-muted">
+                                                <span>Current Week</span>
+                                                <span><field name="late_this_week"/> Late</span>
+                                            </div>
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: 25%; background-color: #e9967a;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

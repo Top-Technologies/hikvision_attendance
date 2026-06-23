@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- Attendance Records Action -->
+    <record id="action_hikvision_attendance" model="ir.actions.act_window">
+        <field name="name">Attendance Records</field>
+        <field name="res_model">hikvision.attendance</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage your Hikvision attendance records here.
+            </p>
+        </field>
+    </record>
+
+    <!-- User List Action -->
+    <record id="action_hikvision_user_list" model="ir.actions.act_window">
+        <field name="name">Hikvision Users</field>
+        <field name="res_model">hikvision.user</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No users found. Sync from device.
+            </p>
+        </field>
+    </record>
+
+    <!-- Sync Device Users Action (Wizard/Service) -->
+    <record id="action_hikvision_service" model="ir.actions.act_window">
+        <field name="name">Sync Device Users</field>
+        <field name="res_model">hikvision.service</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Live Events Action -->
+    <record id="action_hikvision_event_log" model="ir.actions.act_window">
+        <field name="name">Live Events</field>
+        <field name="res_model">hikvision.event.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No events found yet.
+            </p>
+            <p>
+                Events from connected devices will appear here in real-time.
+            </p>
+        </field>
+    </record>
+
+    <!-- Devices Action -->
+    <record id="action_hikvision_device" model="ir.actions.act_window">
+        <field name="name">Devices</field>
+        <field name="res_model">hikvision.device</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Work Policies Action -->
+    <record id="action_hikvision_work_policy" model="ir.actions.act_window">
+        <field name="name">Work Policies</field>
+        <field name="res_model">hikvision.work.policy</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Employee Profiles Action -->
+    <record id="action_hikvision_employee_profile" model="ir.actions.act_window">
+        <field name="name">Employee Profiles</field>
+        <field name="res_model">hikvision.employee.profile</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+
+    <!-- Analytics Action -->
+    <record id="action_hikvision_analytics" model="ir.actions.act_window">
+        <field name="name">Attendance Analytics</field>
+        <field name="res_model">hikvision.attendance</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>
+                Analyze attendance by department, date, and performance.
+            </p>
+        </field>
+    </record>
+
+</odoo>

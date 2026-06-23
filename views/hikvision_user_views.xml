@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hikvision_user_list" model="ir.ui.view">
+        <field name="name">hikvision.user.list</field>
+        <field name="model">hikvision.user</field>
+        <field name="arch" type="xml">
+            <list string="Hikvision Users">
+                <field name="employee_id"/>
+                <field name="name"/>
+                <field name="odoo_employee_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hikvision_user_form" model="ir.ui.view">
+        <field name="name">hikvision.user.form</field>
+        <field name="model">hikvision.user</field>
+        <field name="arch" type="xml">
+            <form string="Hikvision User">
+                <sheet>
+                    <group>
+                        <field name="employee_id"/>
+                        <field name="name"/>
+                        <field name="odoo_employee_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

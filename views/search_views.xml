@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Attendance Search -->
+    <record id="view_hikvision_attendance_search" model="ir.ui.view">
+        <field name="name">hikvision.attendance.search</field>
+        <field name="model">hikvision.attendance</field>
+        <field name="arch" type="xml">
+            <search string="Attendance">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="date"/>
+                <separator/>
+                <filter string="Present" name="present" domain="[('attendance_status', '=', 'present')]"/>
+                <filter string="Incomplete" name="incomplete" domain="[('attendance_status', '=', 'incomplete')]"/>
+                <filter string="Absent" name="absent" domain="[('attendance_status', '=', 'absent')]"/>
+                <separator/>
+                <filter string="Late" name="late" domain="[('is_late', '=', True)]"/>
+                <filter string="Early Leave" name="early_leave" domain="[('is_early_leave', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Department" name="group_dept" context="{'group_by': 'department_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'date'}"/>
+                    <filter string="Attendance" name="group_attendance" context="{'group_by': 'attendance_status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Event Log Search -->
+    <record id="view_hikvision_event_log_search" model="ir.ui.view">
+        <field name="name">hikvision.event.log.search</field>
+        <field name="model">hikvision.event.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Events">
+                <field name="device_id"/>
+                <field name="employee_id"/>
+                <field name="employee_no"/>
+                <group expand="0" string="Group By">
+                    <filter string="Device" name="group_device" context="{'group_by': 'device_id'}"/>
+                    <filter string="Date" name="group_date" context="{'group_by': 'event_date'}"/>
+                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Employee Profile Search -->
+    <record id="view_hikvision_employee_profile_search" model="ir.ui.view">
+        <field name="name">hikvision.employee.profile.search</field>
+        <field name="model">hikvision.employee.profile</field>
+        <field name="arch" type="xml">
+            <search string="Employee Profiles">
+                <field name="employee_name"/>
+                <field name="department_id"/>
+                <field name="job_id"/>
+                <separator/>
+                <filter string="Late This Month" name="late" domain="[('late_days', '>', 0)]"/>
+                <filter string="Has Early Leave" name="early" domain="[('early_leave_days', '>', 0)]"/>
+                <filter string="Has Incomplete" name="incomplete" domain="[('incomplete_days', '>', 0)]"/>
+                <filter string="Has Absences" name="absent" domain="[('absent_days', '>', 0)]"/>
+                <filter string="Perfect Attendance" name="perfect" domain="[('absent_days', '=', 0), ('late_days', '=', 0), ('early_leave_days', '=', 0)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Department" name="group_dept" context="{'group_by': 'department_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+</odoo>

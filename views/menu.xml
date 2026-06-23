@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_hikvision_root"
+              name="Hikvision Attendance"
+              sequence="10"/>
+
+    <!-- Main Menus -->
+    <menuitem id="menu_hikvision_analytics"
+              name="Analytics"
+              parent="menu_hikvision_root"
+              action="action_hikvision_analytics"
+              groups="hikvision_attendance.group_hikvision_hr"
+              sequence="0"/>
+
+    <menuitem id="menu_hikvision_attendance"
+              name="Attendance Records"
+              parent="menu_hikvision_root"
+              action="action_hikvision_attendance"
+              sequence="1"/>
+
+    <menuitem id="menu_hikvision_employee_profile"
+              name="Employee Profiles"
+              parent="menu_hikvision_root"
+              action="action_hikvision_employee_profile"
+              groups="hikvision_attendance.group_hikvision_hr"
+              sequence="2"/>
+
+    <menuitem id="menu_hikvision_users"
+              name="Device Users"
+              parent="menu_hikvision_root"
+              action="action_hikvision_user_list"
+              groups="hikvision_attendance.group_hikvision_hr"
+              sequence="3"/>
+
+    <menuitem id="menu_hikvision_event_log"
+              name="Live Events"
+              parent="menu_hikvision_root"
+              action="action_hikvision_event_log"
+              groups="hikvision_attendance.group_hikvision_hr"
+              sequence="5"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_hikvision_configuration"
+              name="Configuration"
+              parent="menu_hikvision_root"
+              groups="hikvision_attendance.group_hikvision_admin"
+              sequence="100"/>
+
+    <menuitem id="menu_hikvision_device"
+              name="Devices"
+              parent="menu_hikvision_configuration"
+              action="action_hikvision_device"
+              sequence="1"/>
+
+    <menuitem id="menu_hikvision_service_sync"
+              name="Sync Device Users"
+              parent="menu_hikvision_configuration"
+              action="action_hikvision_service"
+              sequence="2"/>
+
+    <menuitem id="menu_hikvision_work_policy"
+              name="Work Policies"
+              parent="menu_hikvision_configuration"
+              action="action_hikvision_work_policy"
+              sequence="3"/>
+</odoo>

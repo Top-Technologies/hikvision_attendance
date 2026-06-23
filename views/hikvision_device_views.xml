@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hikvision_device_form" model="ir.ui.view">
+        <field name="name">hikvision.device.form</field>
+        <field name="model">hikvision.device</field>
+        <field name="arch" type="xml">
+            <form string="Hikvision Device">
+                <header>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="oe_highlight"/>
+                    <button name="action_sync_users" string="Sync Users" type="object" class="btn-info"/>
+                    <button name="action_open_fetch_logs_wizard" string="Fetch Logs" type="object" class="btn-primary"/>
+                    <button name="action_start_stream" string="Start Stream" type="object" class="btn-success" invisible="is_streaming"/>
+                    <button name="action_stop_stream" string="Stop Stream" type="object" class="btn-danger" invisible="not is_streaming"/>
+                    <button name="action_reboot_device" string="Reboot Device" type="object" class="btn-warning" confirm="Are you sure you want to reboot this device?"/>
+                    <field name="status" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Device Configuration">
+                            <field name="ip_address"/>
+                            <field name="port"/>
+                            <field name="username"/>
+                            <field name="password" password="True"/>
+                        </group>
+                        <group string="Status">
+                            <field name="time_offset"/>
+                            <field name="is_streaming" readonly="1"/>
+                            <field name="last_heartbeat"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Connection Mode">
+                            <field name="connection_mode" widget="radio"/>
+                        </group>
+                        <group/>
+                    </group>
+                    
+                    <group string="Bridge Configuration" invisible="connection_mode == 'direct'">
+                        <group>
+                            <field name="bridge_url" placeholder="http://localhost:8443" required="connection_mode == 'bridge'"/>
+                            <field name="bridge_token" password="True" required="connection_mode == 'bridge'"/>
+                            <field name="bridge_device_id" placeholder="device-1" required="connection_mode == 'bridge'"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <button name="action_test_connection" 
+                                type="object" 
+                                string="Test Direct Connection" 
+                                class="oe_highlight"
+                                invisible="connection_mode == 'bridge'"/>
+                        
+                        <button name="action_test_bridge_connection" 
+                                type="object" 
+                                string="Test Bridge Connection" 
+                                class="oe_highlight"
+                                invisible="connection_mode == 'direct'"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_hikvision_device_list" model="ir.ui.view">
+        <field name="name">hikvision.device.list</field>
+        <field name="model">hikvision.device</field>
+        <field name="arch" type="xml">
+            <list string="Hikvision Devices">
+                <field name="name"/>
+
+                <field name="ip_address"/>
+                <field name="status" widget="badge" decoration-success="status == 'connected'" decoration-danger="status == 'error'" decoration-muted="status == 'disconnected'"/>
+                <field name="is_streaming"/>
+                <field name="last_heartbeat"/>
+            </list>
+        </field>
+    </record>
+
+</odoo>

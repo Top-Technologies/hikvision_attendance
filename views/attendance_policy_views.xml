@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hikvision_work_policy_list" model="ir.ui.view">
+        <field name="name">hikvision.work.policy.list</field>
+        <field name="model">hikvision.work.policy</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="work_start" widget="float_time"/>
+                <field name="work_end" widget="float_time"/>
+                <field name="late_tolerance"/>
+                <field name="ot_apply"/>
+                <field name="ignore_late_early"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hikvision_work_policy_form" model="ir.ui.view">
+        <field name="name">hikvision.work.policy.form</field>
+        <field name="model">hikvision.work.policy</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Work Schedule">
+                            <field name="work_start" widget="float_time"/>
+                            <field name="work_end" widget="float_time"/>
+                            <field name="work_end_saturday" widget="float_time"/>
+                            <field name="tz"/>
+                            <field name="lunch_duration"/>
+                            <field name="ignore_late_early"/>
+                        </group>
+                        <group string="Tolerances">
+                            <field name="late_tolerance" invisible="ignore_late_early == True"/>
+                            <field name="early_leave_tolerance" invisible="ignore_late_early == True"/>
+                        </group>
+                    </group>
+                    <group string="Overtime Rules">
+                        <field name="ot_apply"/>
+                        <field name="ot_start_time" widget="float_time" invisible="ot_apply == False"/>
+                        <field name="ot_end_limit" widget="float_time" invisible="ot_apply == False"/>
+                        <group string="Rates" invisible="ot_apply == False" col="4">
+                            <field name="rate_weekday"/>
+                            <field name="rate_saturday"/>
+                            <field name="rate_sunday"/>
+                            <field name="rate_holiday"/>
+                            <field name="rate_night"/>
+                            <field name="night_start" widget="float_time"/>
+                            <field name="night_end" widget="float_time"/>
+                        </group>
+                        <group string="Special Rules" invisible="ot_apply == False" col="4">
+                             <field name="rate_saturday_afternoon"/>
+                             <field name="saturday_afternoon_start" widget="float_time"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Employees">
+                            <field name="employee_ids" widget="many2many"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

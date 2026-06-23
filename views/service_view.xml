@@ -1,0 +1,31 @@
+<odoo>
+
+    <!-- FORM VIEW FOR SERVICE -->
+    <record id="view_hikvision_service_form" model="ir.ui.view">
+        <field name="name">hikvision.service.form</field>
+        <field name="model">hikvision.service</field>
+        <field name="arch" type="xml">
+            <form string="Hikvision Service">
+                <group>
+                    <field name="sync_mode" widget="radio"/>
+                </group>
+                <group invisible="sync_mode != 'auto'">
+                    <field name="device_id" options="{'no_create': True}"/>
+                </group>
+                <group invisible="sync_mode != 'manual'">
+                    <field name="manual_ip"/>
+                    <field name="manual_port"/>
+                    <field name="manual_username"/>
+                    <field name="manual_password" password="True"/>
+                </group>
+                <group>
+                    <button name="action_sync_and_open_users"
+                            type="object"
+                            string="Sync Device Users"
+                            class="oe_highlight"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+</odoo>

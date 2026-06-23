@@ -1,0 +1,17 @@
+<odoo>
+    <!-- 
+        NOTE: This cron references a TransientModel (hikvision.service) which is 
+        unconventional since transient records are auto-vacuumed. However, the 
+        action_cron_fetch_all method is defined as @api.model, so it doesn't 
+        require a record instance and will work correctly.
+    -->
+    <record id="cron_hikvision_fetcher" model="ir.cron">
+        <field name="name">Hikvision Attendance Fetcher</field>
+        <field name="model_id" ref="model_hikvision_service"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_fetch_all()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

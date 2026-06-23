@@ -1,0 +1,31 @@
+<odoo>
+  <template id="dashboard_page" name="Attendance Dashboard">
+    <t t-call="web.layout">
+      <div class="oe_structure">
+        <h1>Attendance for <t t-esc="today"/></h1>
+
+        <table class="table table-bordered">
+          <tr>
+            <th>Name</th>
+            <th>Department</th>
+            <th>First In</th>
+            <th>Last Out</th>
+            <th>Status</th>
+            <th>Total Hours</th>
+          </tr>
+
+          <t t-foreach="logs" t-as="log">
+            <tr>
+              <td><t t-esc="log.employee_id.name"/></td>
+              <td><t t-esc="log.employee_id.department_id.name"/></td>
+              <td><t t-esc="log.first_in"/></td>
+              <td><t t-esc="log.last_out"/></td>
+              <td><t t-esc="log.status"/></td>
+              <td><t t-esc="log.total_hours"/></td>
+            </tr>
+          </t>
+        </table>
+      </div>
+    </t>
+  </template>
+</odoo>

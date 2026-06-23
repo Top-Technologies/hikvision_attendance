@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_form_inherit_hikvision" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.hikvision</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Attendance Policy in HR Settings -->
+            <xpath expr="//page[@name='hr_settings']" position="inside">
+                <group string="Hikvision Attendance" name="hikvision_attendance">
+                    <field name="attendance_policy_id"/>
+                </group>
+            </xpath>
+            
+            <!-- Add Overtime Tab with Full Statistics -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Overtime" name="overtime_info">
+                    <group>
+                        <group string="Current Month Statistics">
+                            <field name="current_month_ot_hours" widget="float_time"/>
+                            <field name="current_month_ot_payable" widget="float_time"/>
+                            <field name="pending_ot_requests"/>
+                        </group>
+                        <group string="Historical Summary">
+                            <field name="total_ot_hours" widget="float_time"/>
+                            <field name="total_ot_payable" widget="float_time"/>
+                            <field name="avg_monthly_ot" widget="float_time"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Overtime Breakdown (Current Month)">
+                            <field name="ot_weekday_hours" widget="float_time"/>
+                            <field name="ot_saturday_hours" widget="float_time"/>
+                            <field name="ot_sunday_hours" widget="float_time"/>
+                            <field name="ot_holiday_hours" widget="float_time"/>
+                            <field name="ot_night_hours" widget="float_time"/>
+                        </group>
+                    </group>
+                    <separator string="Overtime History"/>
+                    <field name="hikvision_attendance_ids" context="{'default_employee_id': id}" domain="[('overtime_hours', '>', 0)]">
+                        <list string="Overtime Records">
+                            <field name="date"/>
+                            <field name="first_check_in" widget="datetime"/>
+                            <field name="last_check_out" widget="datetime"/>
+                            <field name="total_hours" widget="float_time"/>
+                            <field name="overtime_hours" widget="float_time"/>
+                            <field name="ot_payable_hours" widget="float_time"/>
+                            <field name="manual_overtime" widget="float_time"/>
+                            <field name="approval_state" widget="badge" 
+                                   decoration-success="approval_state == 'approved'"
+                                   decoration-warning="approval_state == 'to_approve'"
+                                   decoration-info="approval_state == 'second_approval'"
+                                   decoration-danger="approval_state == 'refused'"/>
+                            <field name="request_reason" optional="hide"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

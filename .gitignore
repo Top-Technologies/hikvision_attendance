@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Odoo / temp
+*.log
+
+# Backup / disabled files
+*.backup
+*.disabled
+
+# IDE (optional)
+.vscode/
+.idea/
+
+*.md
+*.sh

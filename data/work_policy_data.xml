@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Normal Employee: OT Applies -->
+        <record id="policy_normal" model="hikvision.work.policy">
+            <field name="name">Normal Employee</field>
+            <field name="work_start">8.5</field> <!-- 08:30 -->
+            <field name="work_end">17.5</field> <!-- 17:30 -->
+            <field name="ot_apply" eval="True"/>
+            <field name="ot_start_time">17.51666</field> <!-- 17:31 -->
+            <field name="ot_end_limit">6.0</field> <!-- 06:00 Next Day -->
+        </record>
+
+        <!-- Factory Workers: OT Applies -->
+        <record id="policy_factory" model="hikvision.work.policy">
+            <field name="name">Factory Workers</field>
+            <field name="work_start">8.5</field>
+            <field name="work_end">17.5</field>
+            <field name="ot_apply" eval="True"/>
+            <field name="ot_start_time">17.51666</field>
+            <field name="ot_end_limit">6.0</field>
+        </record>
+        
+        <!-- Flexible Shift: OT Applies, Ignore Late/Early -->
+        <record id="policy_flexible" model="hikvision.work.policy">
+            <field name="name">Flexible Shift</field>
+            <field name="ignore_late_early" eval="True"/>
+            <field name="ot_apply" eval="True"/>
+            <field name="ot_start_time">17.51666</field>
+            <field name="ot_end_limit">6.0</field>
+            <!-- Even if flexible, OT usually implies working beyond standard hours, so keeping default OT params -->
+        </record>
+
+        <!-- Contract: No OT -->
+        <record id="policy_contract" model="hikvision.work.policy">
+            <field name="name">Contract</field>
+            <field name="work_start">8.5</field>
+            <field name="work_end">17.5</field>
+            <field name="ot_apply" eval="False"/>
+        </record>
+
+        <!-- Management: No OT -->
+        <record id="policy_management" model="hikvision.work.policy">
+            <field name="name">Management</field>
+            <field name="work_start">8.5</field>
+            <field name="work_end">17.5</field>
+            <field name="ot_apply" eval="False"/>
+        </record>
+    </data>
+</odoo>

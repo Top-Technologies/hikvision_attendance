@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- View for selecting employees to push -->
+    <record id="view_employee_push_list" model="ir.ui.view">
+        <field name="name">hr.employee.push.list</field>
+        <field name="model">hr.employee</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <list string="Select Employees to Push" multi_edit="1">
+                <field name="name"/>
+                <field name="barcode" string="Badge ID"/>
+                <field name="department_id"/>
+                <field name="company_id" column_invisible="1"/>
+                <field name="job_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Server action to push selected employees -->
+    <record id="action_push_selected_to_device" model="ir.actions.server">
+        <field name="name">Push to Hikvision Device</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_model_id" ref="hr.model_hr_employee"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+# Get device from context (set by action_push_selected_employees)
+device_id = env.context.get('hikvision_device_id')
+if not device_id:
+    # Fallback: get the first device if context not set
+    device = env['hikvision.device'].search([], limit=1)
+    if not device:
+        raise UserError("No Hikvision device configured. Please configure a device first.")
+else:
+    device = env['hikvision.device'].browse(device_id)
+    if not device.exists():
+        raise UserError("Selected Hikvision device not found.")
+
+# Push selected employees
+result = device.push_employees_by_ids(records.ids)
+if isinstance(result, dict):
+    action = result
+        </field>
+    </record>
+
+    <!-- Action to open employee selection for push -->
+    <record id="action_select_employees_push" model="ir.actions.act_window">
+        <field name="name">Select Employees to Push</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_employee_push_list"/>
+        <field name="target">current</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Select employees using checkboxes, then click Action → "Push to Hikvision Device"
+            </p>
+        </field>
+    </record>
+</odoo>

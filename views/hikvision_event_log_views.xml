@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hikvision_event_log_list" model="ir.ui.view">
+        <field name="name">hikvision.event.log.list</field>
+        <field name="model">hikvision.event.log</field>
+        <field name="arch" type="xml">
+            <list string="Live Events" create="false" delete="false">
+                <field name="timestamp"/>
+                <field name="device_id"/>
+                <field name="event_type"/>
+                <field name="employee_no"/>
+                <field name="employee_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hikvision_event_log_form" model="ir.ui.view">
+        <field name="name">hikvision.event.log.form</field>
+        <field name="model">hikvision.event.log</field>
+        <field name="arch" type="xml">
+            <form string="Event Log" create="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="timestamp"/>
+                            <field name="device_id"/>
+                            <field name="event_type"/>
+                        </group>
+                        <group>
+                            <field name="employee_no"/>
+                            <field name="employee_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Raw Data">
+                            <field name="raw_data"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+
+</odoo>

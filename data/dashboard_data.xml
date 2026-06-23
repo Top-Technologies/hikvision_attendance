@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="hikvision_dashboard_singleton" model="hikvision.attendance.dashboard">
+            <field name="name">Main Dashboard</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,6 @@
+<odoo>
+    <record id="model_hikvision_service" model="ir.model">
+        <field name="name">hikvision.service</field>
+        <field name="model">hikvision.service</field>
+    </record>
+</odoo>
