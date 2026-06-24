@@ -37,7 +37,7 @@ class HikvisionService(models.TransientModel):
     ], string="Sync Mode", default='auto', required=True)
 
     device_id = fields.Many2one('hikvision.device', string="Device")
-    
+
     manual_ip = fields.Char(string="Device IP")
     manual_port = fields.Integer(string="Port", default=80)
     manual_username = fields.Char(string="Username")
@@ -46,7 +46,7 @@ class HikvisionService(models.TransientModel):
     def _get_auth(self, username, password):
         """Get HTTPDigestAuth for stateless requests"""
         return HTTPDigestAuth(username, password)
-    
+
     def _get_headers(self):
         """Get standard headers for requests"""
         return {
@@ -59,8 +59,100 @@ class HikvisionService(models.TransientModel):
     def fetch_all_users(self):
         """Fetch users from Hikvision device using robust Auth."""
         self.ensure_one()
-        
-        # Determine connection details based on mode
+
+        # --- BRIDGE MODE LOGIC START ---
+        if self.sync_mode == 'auto' and self.device_id and self.device_id.connection_mode == 'bridge':
+            _logger.info(f"Fetching users via bridge for device {self.device_id.name}")
+
+            if not self.device_id.bridge_url or not self.device_id.bridge_token or not self.device_id.bridge_device_id:
+                raise UserError("Bridge configuration incomplete on the device record.")
+
+            import time
+            import json
+
+            try:
+                # 1. Submit sync_users command to bridge
+                response = requests.post(
+                    f"{self.device_id.bridge_url}/api/v1/commands",
+                    headers={
+                        'Authorization': f'Bearer {self.device_id.bridge_token}',
+                        'Content-Type': 'application/json'
+                    },
+                    json={
+                        'device_id': self.device_id.bridge_device_id,
+                        'operation': 'sync_users',
+                        'parameters': {'max_results': 1000}
+                    },
+                    timeout=120
+                )
+                if response.status_code != 201:
+                    raise UserError(f"Bridge error: {response.text}")
+
+                command_id = response.json()['command_id']
+
+                # 2. Poll for result
+                max_wait = 300
+                start_time = time.time()
+                while time.time() - start_time < max_wait:
+                    res_response = requests.get(
+                        f"{self.device_id.bridge_url}/api/v1/commands/{command_id}",
+                        headers={'Authorization': f'Bearer {self.device_id.bridge_token}'},
+                        timeout=120
+                    )
+                    res_data = res_response.json()
+                    if res_data['status'] == 'completed':
+                        result = json.loads(res_data['result'])
+                        if not result.get('success'):
+                            raise UserError(f"Bridge sync failed: {result.get('error')}")
+
+                        # Process users from bridge result
+                        user_list = result.get('users', [])
+                        User = self.env["hikvision.user"]
+                        total_count = 0
+                        for u in user_list:
+                            emp_id = u.get("employeeNo")
+                            if not emp_id: continue
+
+                            vals = {"name": u.get("name", "Unknown")}
+                            valid_dict = u.get("Valid", {})
+                            begin_str = valid_dict.get("beginTime")
+                            end_str = valid_dict.get("endTime")
+
+                            offset = self.device_id.time_offset or 0.0
+                            for field, val_str in [("begin_time", begin_str), ("end_time", end_str)]:
+                                if val_str:
+                                    try:
+                                        dt = parser.parse(val_str)
+                                        if dt.tzinfo: dt = dt.astimezone(pytz.UTC).replace(tzinfo=None)
+                                        if offset: dt += timedelta(hours=offset)
+                                        vals[field] = dt
+                                    except: pass
+
+                            user = User.search([("employee_id", "=", emp_id)], limit=1)
+                            if user: user.write(vals)
+                            else:
+                                vals["employee_id"] = emp_id
+                                User.create(vals)
+                            total_count += 1
+
+                        return {
+                            "type": "ir.actions.client",
+                            "tag": "display_notification",
+                            "params": {
+                                "title": "Success",
+                                "message": f"{total_count} users synced via bridge.",
+                                "type": "success",
+                            }
+                        }
+                    elif res_data['status'] == 'failed':
+                        raise UserError(f"Bridge sync failed: {res_data.get('error')}")
+                    time.sleep(2)
+                raise UserError("Bridge sync timeout after 5 minutes")
+            except Exception as e:
+                raise UserError(f"Bridge communication error during sync: {e}")
+        # --- BRIDGE MODE LOGIC END ---
+
+        # Original Direct Connection Logic
         if self.sync_mode == 'auto':
             if not self.device_id:
                 raise UserError("Please select a device.")
@@ -77,7 +169,6 @@ class HikvisionService(models.TransientModel):
             password = self.manual_password
 
         # Use direct device connection (not proxy)
-        # The device's _get_session uses HTTPDigestAuth which is correct for direct connections
         base_url = f"http://{ip}:{port}"
         url = f"{base_url}/ISAPI/AccessControl/UserInfo/Search?format=json"
 
@@ -89,7 +180,7 @@ class HikvisionService(models.TransientModel):
         # Create auth
         auth = self._get_auth(username, password)
         headers = self._get_headers()
-        
+
         try:
             while has_more:
                 payload = {
@@ -99,9 +190,9 @@ class HikvisionService(models.TransientModel):
                         "maxResults": 30
                     }
                 }
-                
+
                 _logger.info(f"Syncing users batch starting at position {search_position}...")
-                
+
                 response = requests.post(
                     url,
                     json=payload,
@@ -109,20 +200,19 @@ class HikvisionService(models.TransientModel):
                     headers=headers,
                     timeout=30
                 )
-                
+
                 response.raise_for_status()
                 data = response.json()
-                
+
                 user_info_search = data.get("UserInfoSearch", {})
                 user_list = user_info_search.get("UserInfo", [])
-                
-                # Handle single dict response
+
                 if isinstance(user_list, dict):
                     user_list = [user_list]
-                
+
                 batch_count = len(user_list)
                 _logger.info(f"Hikvision Sync Batch: Found {batch_count} users.")
-                
+
                 if batch_count == 0:
                      has_more = False
                      break
@@ -132,20 +222,15 @@ class HikvisionService(models.TransientModel):
                     name = u.get("name", "Unknown")
                     if not emp_id:
                         continue
-                    
-                    # Extract Validity
+
                     valid_dict = u.get("Valid", {})
                     begin_str = valid_dict.get("beginTime")
                     end_str = valid_dict.get("endTime")
-                    
-                    vals = {
-                        "name": name,
-                    }
-                    
-                    # Parse datetime with timezone handling
+
+                    vals = {"name": name}
 
                     offset = self.device_id.time_offset if self.sync_mode == 'auto' and self.device_id else 0.0
-                    
+
                     if begin_str:
                         try:
                             dt = parser.parse(begin_str)
@@ -167,7 +252,7 @@ class HikvisionService(models.TransientModel):
                             vals["end_time"] = dt
                         except Exception:
                             pass
-                    
+
                     user = User.search([("employee_id", "=", emp_id)], limit=1)
                     if user:
                         user.write(vals)
@@ -175,17 +260,15 @@ class HikvisionService(models.TransientModel):
                         vals["employee_id"] = emp_id
                         User.create(vals)
                     total_count += 1
-                
-                # Check for more
+
                 response_status = user_info_search.get("responseStatusStrg", "OK")
                 num_of_matches = user_info_search.get("numOfMatches", 0)
-                
-                matches_in_batch = int(num_of_matches) if num_of_matches else batch_count
+
                 search_position += batch_count
-                
+
                 if response_status != 'MORE':
                     has_more = False
-                
+
                 if total_count > 2000:
                     _logger.warning("Sync limit reached (2000 users). Stopping.")
                     break
@@ -205,7 +288,6 @@ class HikvisionService(models.TransientModel):
 
     def action_sync_and_open_users(self):
         """Sync users from device and open the user list"""
-        # This calls fetch_all_users which will now use the wizard's configuration
         self.fetch_all_users()
 
         return {
@@ -219,16 +301,15 @@ class HikvisionService(models.TransientModel):
     def action_cron_fetch_all(self):
         """Scheduled action to fetch logs from all connected devices."""
         from datetime import datetime, timedelta
-        
+
         devices = self.env['hikvision.device'].search([('status', '!=', 'error')])
-        
+
         today = fields.Date.today()
         three_days_ago = today - timedelta(days=3)
-        
+
         for device in devices:
             try:
                 _logger.info(f"Cron: Fetching logs for device {device.name} (Last 3 days)")
-                # Fetch last 3 days to catch up on weekend/missed data
                 device.action_fetch_logs_by_date(three_days_ago, today)
             except Exception as e:
                 _logger.error(f"Cron: Failed to fetch logs for {device.name}: {e}")
