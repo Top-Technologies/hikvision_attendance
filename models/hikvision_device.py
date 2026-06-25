@@ -187,7 +187,7 @@ class HikvisionDevice(models.Model):
                 timeout=120
             )
             
-            if response.status_code != 201:
+            if response.status_code not in [200, 201, 202]:
                 raise UserError(f"Bridge error: {response.text}")
             
             command_data = response.json()
