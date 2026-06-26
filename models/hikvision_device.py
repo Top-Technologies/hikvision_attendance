@@ -72,6 +72,11 @@ class HikvisionDevice(models.Model):
 
     def action_test_connection(self):
         self.ensure_one()
+        
+        # Dispatch to bridge connection test if in bridge mode
+        if self.connection_mode == 'bridge':
+            return self.action_test_bridge_connection()
+            
         url = self._get_api_url("ISAPI/System/deviceInfo")
         try:
             response = requests.get(
