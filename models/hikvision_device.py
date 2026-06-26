@@ -682,6 +682,10 @@ class HikvisionDevice(models.Model):
         """
         self.ensure_one()
         
+        # Check for bridge mode
+        if self.connection_mode == 'bridge':
+            return self._fetch_logs_via_bridge(start_date, end_date)
+            
         # Convert to date objects if strings
         if isinstance(start_date, str):
             start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d").date()
