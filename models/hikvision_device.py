@@ -1333,32 +1333,48 @@ class HikvisionDevice(models.Model):
             url = device._get_api_url("ISAPI/Event/notification/alertStream")
             _logger.info(f"Starting stream listener for device {device.name} at {url}")
             
-            # Flag to track if we should keep streaming
-            keep_streaming = True
+            # Custom headers for stream to keep it alive
+            headers = device._get_headers()
+            headers.update({'Connection': 'keep-alive'})
+            
             check_counter = 0
             
-            try:
-                # Use stateless request with streaming
-                with requests.get(
-                    url,
-                    auth=device._get_auth(),
-                    headers=device._get_headers(),
-                    stream=True,
-                    timeout=(10, None)  # 10 sec connect timeout, no read timeout
-                ) as response:
+            while True:
+                # Check if we should still be streaming before connecting/reconnecting
+                try:
+                    new_cr.execute("SELECT is_streaming FROM hikvision_device WHERE id = %s", (device_id,))
+                    result = new_cr.fetchone()
+                    if not result or not result[0]:
+                        _logger.info("Streaming stopped by user")
+                        break
+                except Exception as e:
+                    _logger.error(f"Error checking stream status: {e}")
+                    break
                     
-                    if response.status_code != 200:
-                        _logger.error(f"Stream failed with status {response.status_code}")
-                        device.write({'status': 'error', 'is_streaming': False})
-                        new_cr.commit()
-                        return
+                try:
+                    # Use stateless request with streaming
+                    with requests.get(
+                        url,
+                        auth=device._get_auth(),
+                        headers=headers,
+                        stream=True,
+                        timeout=(10, None)  # 10 sec connect timeout, no read timeout
+                    ) as response:
+                        
+                        if response.status_code != 200:
+                            _logger.error(f"Stream failed with status {response.status_code}")
+                            device.write({'status': 'error', 'is_streaming': False})
+                            new_cr.commit()
+                            break
 
-                    _logger.info(f"Stream connected successfully for device {device.name}")
-                    
-                    # Buffer to accumulate JSON content
-                    json_buffer = ""
-                    
-                    for line in response.iter_lines():
+                        _logger.info(f"Stream connected successfully for device {device.name}")
+                        device.write({'status': 'connected'})
+                        new_cr.commit()
+                        
+                        # Buffer to accumulate JSON content
+                        json_buffer = ""
+                        
+                        for line in response.iter_lines():
                             check_counter += 1
                             
                             # Only check database every 50 iterations to reduce overhead
@@ -1369,13 +1385,12 @@ class HikvisionDevice(models.Model):
                                     result = new_cr.fetchone()
                                     if not result or not result[0]:
                                         _logger.info("Streaming stopped by user")
-                                        keep_streaming = False
+                                        raise StopIteration("User stopped")
+                                except StopIteration:
+                                    raise
                                 except Exception as e:
                                     _logger.error(f"Error checking stream status: {e}")
                             
-                            if not keep_streaming:
-                                break
-                                
                             if line:
                                 decoded_line = line.decode('utf-8', errors='ignore').strip()
                                 
@@ -1403,21 +1418,27 @@ class HikvisionDevice(models.Model):
                                         _logger.error(f"Error processing event: {e}")
                                         json_buffer = ""
 
-                                
                                 # Prevent buffer from growing too large
                                 if len(json_buffer) > 50000:
                                     json_buffer = ""
-                            
+                                    
+                except StopIteration:
+                    break # User requested stop
+                except Exception as e:
+                    _logger.warning(f"Stream disconnected: {e}. Retrying in 5 seconds...")
+                    time.sleep(5)
+            
+            # End of while True loop (graceful exit)
+            try:
+                # Use a new cursor to write the disconnected status to ensure it commits
+                with self.env.registry.cursor() as end_cr:
+                    end_device = self.with_env(self.env(cr=end_cr)).browse(device_id)
+                    # Don't overwrite error if it was an error
+                    if end_device.status != 'error':
+                        end_device.write({'status': 'disconnected', 'is_streaming': False})
+                    end_cr.commit()
             except Exception as e:
-                _logger.exception("Stream listener crashed")
-                try:
-                    # Use a new cursor to write the error status
-                    with self.env.registry.cursor() as err_cr:
-                        err_device = self.with_env(self.env(cr=err_cr)).browse(device_id)
-                        err_device.write({'status': 'error', 'is_streaming': False})
-                        err_cr.commit()
-                except:
-                    pass
+                _logger.error(f"Failed to update device status on exit: {e}")
             finally:
                 _logger.info("Stream listener stopped")
 
