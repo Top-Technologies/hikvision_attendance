@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+
+    <!-- Monthly Summary List View -->
+    <record id="view_hikvision_monthly_summary_list" model="ir.ui.view">
+        <field name="name">hikvision.monthly.summary.list</field>
+        <field name="model">hikvision.monthly.summary</field>
+        <field name="arch" type="xml">
+            <list string="Monthly Attendance Summary"
+                  decoration-danger="attendance_rate &lt; 70"
+                  decoration-warning="attendance_rate &lt; 90">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="month_display"/>
+                <field name="working_days"/>
+                <field name="present_days"/>
+                <field name="absent_days"/>
+                <field name="late_days"/>
+                <field name="early_leave_days"/>
+                <field name="incomplete_days" string="Missing Punch"/>
+                <field name="total_hours" widget="float_time"/>
+                <field name="overtime_hours" widget="float_time"/>
+                <field name="ot_payable_hours" widget="float_time"/>
+                <field name="late_minutes_total" string="Late (min)"/>
+                <field name="early_leave_minutes_total" string="Early (min)"/>
+                <field name="attendance_rate" string="Att. Rate %" widget="percentage"/>
+                <field name="punctuality_rate" string="Punctuality %" widget="percentage"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Monthly Summary Pivot View -->
+    <record id="view_hikvision_monthly_summary_pivot" model="ir.ui.view">
+        <field name="name">hikvision.monthly.summary.pivot</field>
+        <field name="model">hikvision.monthly.summary</field>
+        <field name="arch" type="xml">
+            <pivot string="Monthly Attendance Summary" display_quantity="1">
+                <field name="department_id" type="row"/>
+                <field name="employee_id" type="row"/>
+                <field name="month_display" type="col"/>
+                <field name="present_days" type="measure"/>
+                <field name="absent_days" type="measure"/>
+                <field name="total_hours" type="measure"/>
+                <field name="overtime_hours" type="measure"/>
+                <field name="attendance_rate" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Monthly Summary Graph View -->
+    <record id="view_hikvision_monthly_summary_graph" model="ir.ui.view">
+        <field name="name">hikvision.monthly.summary.graph</field>
+        <field name="model">hikvision.monthly.summary</field>
+        <field name="arch" type="xml">
+            <graph string="Monthly Attendance Summary" type="bar">
+                <field name="department_id"/>
+                <field name="attendance_rate" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Monthly Summary Search View -->
+    <record id="view_hikvision_monthly_summary_search" model="ir.ui.view">
+        <field name="name">hikvision.monthly.summary.search</field>
+        <field name="model">hikvision.monthly.summary</field>
+        <field name="arch" type="xml">
+            <search string="Search Monthly Summaries">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="month"/>
+                <filter name="filter_current_month" string="Current Month"
+                        domain="[('month', '=', context_today().strftime('%Y-%m-01'))]"/>
+                <group>
+                    <filter name="group_dept" string="Department" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'month_display'}"/>
+                    <filter name="group_emp" string="Employee" context="{'group_by': 'employee_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    
+    
+</data>
+</odoo>

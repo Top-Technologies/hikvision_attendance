@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+
+    <!-- Absence Line List View -->
+    <record id="view_hikvision_absence_line_list" model="ir.ui.view">
+        <field name="name">hikvision.absence.line.list</field>
+        <field name="model">hikvision.absence.line</field>
+        <field name="arch" type="xml">
+            <list string="Absence Records"
+                  decoration-danger="absence_type == 'absent'"
+                  decoration-warning="absence_type == 'incomplete'">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="date"/>
+                <field name="day_of_week"/>
+                <field name="absence_type" widget="badge"
+                       decoration-danger="absence_type == 'absent'"
+                       decoration-warning="absence_type == 'incomplete'"
+                       decoration-info="absence_type == 'leave'"/>
+                <field name="reason"/>
+                <field name="generated_at" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Absence Line Pivot -->
+    <record id="view_hikvision_absence_line_pivot" model="ir.ui.view">
+        <field name="name">hikvision.absence.line.pivot</field>
+        <field name="model">hikvision.absence.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Absence Summary" display_quantity="1">
+                <field name="department_id" type="row"/>
+                <field name="employee_id" type="row"/>
+                <field name="date" interval="month" type="col"/>
+                <field name="absence_type" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Absence Line Graph -->
+    <record id="view_hikvision_absence_line_graph" model="ir.ui.view">
+        <field name="name">hikvision.absence.line.graph</field>
+        <field name="model">hikvision.absence.line</field>
+        <field name="arch" type="xml">
+            <graph string="Absence by Department" type="bar">
+                <field name="department_id"/>
+                <field name="absence_type" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Absence Line Search -->
+    <record id="view_hikvision_absence_line_search" model="ir.ui.view">
+        <field name="name">hikvision.absence.line.search</field>
+        <field name="model">hikvision.absence.line</field>
+        <field name="arch" type="xml">
+            <search string="Search Absences">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="date"/>
+                <filter name="filter_absent" string="Absent" domain="[('absence_type', '=', 'absent')]"/>
+                <filter name="filter_incomplete" string="Missing Punch" domain="[('absence_type', '=', 'incomplete')]"/>
+                <filter name="filter_leave" string="On Leave" domain="[('absence_type', '=', 'leave')]"/>
+                <group>
+                    <filter name="group_dept" string="Department" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_emp" string="Employee" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_type" string="Absence Type" context="{'group_by': 'absence_type'}"/>
+                    <filter name="group_week" string="Week" context="{'group_by': 'date:week'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    
+    
+</data>
+</odoo>

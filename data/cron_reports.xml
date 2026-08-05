@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    
+    
+    <record id="cron_generate_daily_summary" model="ir.cron">
+        <field name="name">Generate Daily Attendance Summary</field>
+        <field name="model_id" ref="model_hikvision_monthly_summary"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_generate_yesterday()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).replace(hour=1, minute=0, second=0)"/>
+        <field name="priority">10</field>
+    </record>
+
+    <record id="cron_generate_monthly_summary" model="ir.cron">
+        <field name="name">Generate Monthly Attendance Summary</field>
+        <field name="model_id" ref="model_hikvision_monthly_summary"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_generate_monthly()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now().replace(day=1) + timedelta(days=32)).replace(day=1, hour=2, minute=0, second=0)"/>
+        <field name="priority">5</field>
+    </record>
+
+    <record id="cron_generate_payroll_summary" model="ir.cron">
+        <field name="name">Generate Payroll Attendance Summary</field>
+        <field name="model_id" ref="model_hikvision_payroll_summary"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_generate_payroll()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now().replace(day=1) + timedelta(days=32)).replace(day=1, hour=3, minute=0, second=0)"/>
+        <field name="priority">5</field>
+    </record>
+
+    <record id="cron_email_weekly_exceptions" model="ir.cron">
+        <field name="name">Email Weekly Exception Report</field>
+        <field name="model_id" ref="model_hikvision_attendance"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_email_weekly_exceptions()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">weeks</field>
+        <field name="active" eval="False"/>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=(7 - DateTime.now().weekday()))).replace(hour=8, minute=0, second=0)"/>
+        <field name="priority">15</field>
+    </record>
+
+    <record id="cron_email_monthly_reports" model="ir.cron">
+        <field name="name">Email Monthly Reports to Managers</field>
+        <field name="model_id" ref="model_hikvision_monthly_summary"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_email_monthly_reports()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="False"/>
+        <field name="nextcall" eval="(DateTime.now().replace(day=1) + timedelta(days=32)).replace(day=2, hour=9, minute=0, second=0)"/>
+        <field name="priority">20</field>
+    </record>
+
+    <record id="cron_cleanup_sync_logs" model="ir.cron">
+        <field name="name">Cleanup Old Sync Logs</field>
+        <field name="model_id" ref="model_hikvision_sync_log"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_cleanup_old_logs()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">months</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now().replace(day=15) + timedelta(days=32)).replace(day=15, hour=3, minute=0, second=0)"/>
+        <field name="priority">25</field>
+    </record>
+
+    <record id="cron_update_dashboard_kpis" model="ir.cron">
+        <field name="name">Update Attendance Dashboard KPIs</field>
+        <field name="model_id" ref="model_hikvision_attendance_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_update_kpis()</field>
+        <field name="interval_number">6</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+        <field name="priority">30</field>
+    </record>
+
+    <record id="cron_archive_old_attendance" model="ir.cron">
+        <field name="name">Archive Old Attendance Records</field>
+        <field name="model_id" ref="model_hikvision_attendance"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_archive_old_records()</field>
+        <field name="interval_number">3</field>
+        <field name="interval_type">months</field>
+        <field name="active" eval="False"/>
+        <field name="nextcall" eval="(DateTime.now().replace(day=1) + timedelta(days=90)).replace(day=1, hour=4, minute=0, second=0)"/>
+        <field name="priority">35</field>
+    </record>
+
+    <record id="cron_generate_monthly_analytics" model="ir.cron">
+        <field name="name">Generate Monthly Analytics</field>
+        <field name="model_id" ref="model_hikvision_attendance_analytics"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_generate_monthly_analytics()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now().replace(day=1) + timedelta(days=32)).replace(day=3, hour=5, minute=0, second=0)"/>
+        <field name="priority">8</field>
+    </record>
+
+    <record id="cron_generate_performance_scores" model="ir.cron">
+        <field name="name">Generate Employee Performance Scores</field>
+        <field name="model_id" ref="model_hikvision_employee_performance"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_generate_performance()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="active" eval="True"/>
+        <field name="nextcall" eval="(DateTime.now().replace(day=1) + timedelta(days=32)).replace(day=3, hour=6, minute=0, second=0)"/>
+        <field name="priority">9</field>
+    </record>
+
+    
+    
+</data>
+</odoo>

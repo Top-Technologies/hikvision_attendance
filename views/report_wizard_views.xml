@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+
+    <!-- ================================================================
+         DAILY ATTENDANCE REGISTER WIZARD
+    ================================================================ -->
+    <record id="view_daily_register_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.daily.register.wizard.form</field>
+        <field name="model">hikvision.daily.register.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Daily Attendance Register">
+                <group>
+                    <group string="Report Parameters">
+                        <field name="report_date"/>
+                    </group>
+                    <group string="Filters (leave empty for all)">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="Generate Report" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         MONTHLY ATTENDANCE SUMMARY WIZARD
+    ================================================================ -->
+    <record id="view_monthly_summary_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.monthly.summary.wizard.form</field>
+        <field name="model">hikvision.monthly.summary.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Monthly Attendance Summary">
+                <group>
+                    <group string="Report Parameters">
+                        <field name="month" string="Target Month"/>
+                    </group>
+                    <group string="Filters (leave empty for all)">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="Generate Report" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         EMPLOYEE TIMESHEET REPORT WIZARD
+    ================================================================ -->
+    <record id="view_timesheet_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.timesheet.wizard.form</field>
+        <field name="model">hikvision.timesheet.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Employee Timesheet Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Timesheet" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         OVERTIME REPORT WIZARD
+    ================================================================ -->
+    <record id="view_overtime_report_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.overtime.report.wizard.form</field>
+        <field name="model">hikvision.overtime.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Overtime Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                        <field name="approval_state"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Overtime" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         LATE ARRIVAL & EARLY DEPARTURE WIZARD
+    ================================================================ -->
+    <record id="view_late_early_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.late.early.wizard.form</field>
+        <field name="model">hikvision.late.early.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Late Arrival &amp; Early Departure Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="report_type"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Report" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         ABSENCE REPORT WIZARD
+    ================================================================ -->
+    <record id="view_absence_report_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.absence.report.wizard.form</field>
+        <field name="model">hikvision.absence.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Absence Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="Generate Absence Report" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         MISSING PUNCH REPORT WIZARD
+    ================================================================ -->
+    <record id="view_missing_punch_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.missing.punch.wizard.form</field>
+        <field name="model">hikvision.missing.punch.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Missing Punch Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Missing Punches" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         SHIFT COMPLIANCE REPORT WIZARD
+    ================================================================ -->
+    <record id="view_shift_compliance_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.shift.compliance.wizard.form</field>
+        <field name="model">hikvision.shift.compliance.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Shift Compliance Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                        <field name="policy_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Compliance" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         ATTENDANCE EXCEPTION REPORT WIZARD
+    ================================================================ -->
+    <record id="view_exception_report_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.exception.report.wizard.form</field>
+        <field name="model">hikvision.exception.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Attendance Exception Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <group string="Exception Types">
+                    <group>
+                        <field name="include_late"/>
+                        <field name="include_early"/>
+                    </group>
+                    <group>
+                        <field name="include_missing_punch"/>
+                        <field name="include_absent"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Exceptions" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         DEVICE SYNC REPORT WIZARD
+    ================================================================ -->
+    <record id="view_sync_report_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.sync.report.wizard.form</field>
+        <field name="model">hikvision.sync.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Device Synchronization Report">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="status_filter"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="device_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Sync Logs" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         BRANCH / LOCATION REPORT WIZARD
+    ================================================================ -->
+    <record id="view_branch_report_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.branch.report.wizard.form</field>
+        <field name="model">hikvision.branch.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Attendance by Branch / Location">
+                <group>
+                    <group string="Date Range">
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group string="Filters">
+                        <field name="device_ids" widget="many2many_tags"/>
+                        <field name="department_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="View Report" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         PAYROLL ATTENDANCE SUMMARY WIZARD
+    ================================================================ -->
+    <record id="view_payroll_summary_wizard_form" model="ir.ui.view">
+        <field name="name">hikvision.payroll.summary.wizard.form</field>
+        <field name="model">hikvision.payroll.summary.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Payroll Attendance Summary">
+                <group>
+                    <group string="Report Parameters">
+                        <field name="month" string="Target Month"/>
+                    </group>
+                    <group string="Filters (leave empty for all)">
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_run" type="object" string="Generate Payroll Summary" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    
+    
+</data>
+</odoo>

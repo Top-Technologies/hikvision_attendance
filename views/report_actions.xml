@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+        <!-- ================================================================
+             WIZARD LAUNCHER ACTIONS (open in dialog)
+        ================================================================ -->
+
+        <!-- 1. Daily Attendance Register -->
+        <record id="action_daily_register_wizard" model="ir.actions.act_window">
+            <field name="name">Daily Attendance Register</field>
+            <field name="res_model">hikvision.daily.register.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 2. Monthly Attendance Summary -->
+        <record id="action_monthly_summary_wizard" model="ir.actions.act_window">
+            <field name="name">Monthly Attendance Summary</field>
+            <field name="res_model">hikvision.monthly.summary.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 3. Employee Timesheet Report -->
+        <record id="action_timesheet_wizard" model="ir.actions.act_window">
+            <field name="name">Employee Timesheet Report</field>
+            <field name="res_model">hikvision.timesheet.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 4. Overtime Report -->
+        <record id="action_overtime_report_wizard" model="ir.actions.act_window">
+            <field name="name">Overtime Report</field>
+            <field name="res_model">hikvision.overtime.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 5. Late Arrival &amp; Early Departure -->
+        <record id="action_late_early_wizard" model="ir.actions.act_window">
+            <field name="name">Late Arrival &amp; Early Departure</field>
+            <field name="res_model">hikvision.late.early.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 6. Absence Report -->
+        <record id="action_absence_report_wizard" model="ir.actions.act_window">
+            <field name="name">Absence Report</field>
+            <field name="res_model">hikvision.absence.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 7. Missing Punch Report -->
+        <record id="action_missing_punch_wizard" model="ir.actions.act_window">
+            <field name="name">Missing Punch Report</field>
+            <field name="res_model">hikvision.missing.punch.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 8. Shift Compliance Report -->
+        <record id="action_shift_compliance_wizard" model="ir.actions.act_window">
+            <field name="name">Shift Compliance Report</field>
+            <field name="res_model">hikvision.shift.compliance.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 9. Attendance Exception Report -->
+        <record id="action_exception_report_wizard" model="ir.actions.act_window">
+            <field name="name">Attendance Exception Report</field>
+            <field name="res_model">hikvision.exception.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 10. Device Sync Report -->
+        <record id="action_sync_report_wizard" model="ir.actions.act_window">
+            <field name="name">Device Synchronization Report</field>
+            <field name="res_model">hikvision.sync.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 11. Branch / Location Report -->
+        <record id="action_branch_report_wizard" model="ir.actions.act_window">
+            <field name="name">Attendance by Branch / Location</field>
+            <field name="res_model">hikvision.branch.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- 12. Payroll Attendance Summary -->
+        <record id="action_payroll_summary_wizard" model="ir.actions.act_window">
+            <field name="name">Payroll Attendance Summary</field>
+            <field name="res_model">hikvision.payroll.summary.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <!-- ================================================================
+             DIRECT MODEL ACTIONS (for result views and audit trail)
+        ================================================================ -->
+
+        <!-- Monthly Summary Direct View -->
+        <record id="action_hikvision_monthly_summary" model="ir.actions.act_window">
+            <field name="name">Monthly Attendance Summary</field>
+            <field name="res_model">hikvision.monthly.summary</field>
+            <field name="view_mode">list,pivot,graph</field>
+        </record>
+
+        <!-- Absence Lines Direct View -->
+        <record id="action_hikvision_absence_line" model="ir.actions.act_window">
+            <field name="name">Absence Records</field>
+            <field name="res_model">hikvision.absence.line</field>
+            <field name="view_mode">list,pivot,graph</field>
+        </record>
+
+        <!-- Sync Log Direct View -->
+        <record id="action_hikvision_sync_log" model="ir.actions.act_window">
+            <field name="name">Device Sync Logs</field>
+            <field name="res_model">hikvision.sync.log</field>
+            <field name="view_mode">list,graph</field>
+        </record>
+
+        <!-- Audit Trail Direct View -->
+        <record id="action_hikvision_audit_trail" model="ir.actions.act_window">
+            <field name="name">Attendance Audit Trail</field>
+            <field name="res_model">hikvision.audit.trail</field>
+            <field name="view_mode">list</field>
+        </record>
+
+        <!-- Payroll Summary Direct View -->
+        <record id="action_hikvision_payroll_summary" model="ir.actions.act_window">
+            <field name="name">Payroll Attendance Summary</field>
+            <field name="res_model">hikvision.payroll.summary</field>
+            <field name="view_mode">list,pivot</field>
+        </record>
+
+        <!-- Department Attendance Dashboard — attendance grouped by dept -->
+        <record id="action_dept_attendance_dashboard" model="ir.actions.act_window">
+            <field name="name">Department Attendance Dashboard</field>
+            <field name="res_model">hikvision.attendance</field>
+            <field name="view_mode">list,pivot,graph</field>
+            <field name="context">{'group_by': ['department_id'], 'pivot_measures': ['present_days'], 'graph_type': 'bar'}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No attendance records found for the selected period.
+                </p>
+            </field>
+        </record>
+
+        <!-- KPI Dashboard — points to existing dashboard -->
+        <record id="action_kpi_dashboard" model="ir.actions.act_window">
+            <field name="name">Attendance KPI Dashboard</field>
+            <field name="res_model">hikvision.attendance.dashboard</field>
+            <field name="view_mode">form</field>
+            <field name="target">current</field>
+        </record>
+    
+    
+</data>
+</odoo>

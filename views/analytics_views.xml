@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    
+    
+       <record id="view_attendance_analytics_list" model="ir.ui.view">
+        <field name="name">hikvision.attendance.analytics.list</field>
+        <field name="model">hikvision.attendance.analytics</field>
+        <field name="arch" type="xml">
+            <list string="Attendance Analytics">
+                <field name="period_name"/>
+                <field name="department_id"/>
+                <field name="total_employees"/>
+                <field name="avg_attendance_rate" decoration-success="avg_attendance_rate &gt;= 95" decoration-warning="avg_attendance_rate &lt; 90" decoration-danger="avg_attendance_rate &lt; 85"/>
+                <field name="avg_punctuality_rate" decoration-success="avg_punctuality_rate &gt;= 95" decoration-warning="avg_punctuality_rate &lt; 90"/>
+                <field name="attendance_trend" decoration-success="attendance_trend == 'improving'" decoration-danger="attendance_trend == 'declining'"/>
+                <field name="overall_score" decoration-success="overall_score &gt;= 85" decoration-warning="overall_score &lt; 75" decoration-danger="overall_score &lt; 65"/>
+                <field name="predicted_absence_risk" decoration-danger="predicted_absence_risk == 'high'" decoration-warning="predicted_absence_risk == 'medium'" decoration-success="predicted_absence_risk == 'low'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Analytics Form View -->
+    <record id="view_attendance_analytics_form" model="ir.ui.view">
+        <field name="name">hikvision.attendance.analytics.form</field>
+        <field name="model">hikvision.attendance.analytics</field>
+        <field name="arch" type="xml">
+            <form string="Analytics Details">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="period_name"/></h1>
+                        <h3><field name="department_id" placeholder="All Departments"/></h3>
+                    </div>
+                    <group>
+                        <group string="Period">
+                            <field name="period_type"/>
+                            <field name="period_start"/>
+                            <field name="period_end"/>
+                            <field name="total_employees"/>
+                        </group>
+                        <group string="Performance Score">
+                            <field name="overall_score" widget="progressbar"/>
+                            <field name="attendance_score"/>
+                            <field name="punctuality_score"/>
+                            <field name="compliance_score"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Attendance Metrics">
+                            <field name="avg_attendance_rate"/>
+                            <field name="attendance_trend" widget="badge" decoration-success="attendance_trend == 'improving'" decoration-danger="attendance_trend == 'declining'"/>
+                            <field name="avg_punctuality_rate"/>
+                            <field name="punctuality_trend" widget="badge" decoration-success="punctuality_trend == 'improving'" decoration-danger="punctuality_trend == 'declining'"/>
+                        </group>
+                        <group string="Risk Assessment">
+                            <field name="predicted_absence_risk" widget="badge" decoration-danger="predicted_absence_risk == 'high'" decoration-warning="predicted_absence_risk == 'medium'"/>
+                            <field name="risk_score" widget="progressbar"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Exceptions">
+                            <group>
+                                <group>
+                                    <field name="total_late_incidents"/>
+                                    <field name="late_trend_pct" widget="percentage"/>
+                                </group>
+                                <group>
+                                    <field name="total_absences"/>
+                                    <field name="absence_trend_pct" widget="percentage"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group>
+                                    <field name="total_early_departures"/>
+                                </group>
+                                <group>
+                                    <field name="total_missing_punches"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Overtime">
+                            <group>
+                                <field name="total_ot_hours"/>
+                                <field name="avg_ot_per_employee"/>
+                                <field name="ot_trend_pct" widget="percentage"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Analytics Pivot View -->
+    <record id="view_attendance_analytics_pivot" model="ir.ui.view">
+        <field name="name">hikvision.attendance.analytics.pivot</field>
+        <field name="model">hikvision.attendance.analytics</field>
+        <field name="arch" type="xml">
+            <pivot string="Analytics Pivot">
+                <field name="period_name" type="row"/>
+                <field name="department_id" type="col"/>
+                <field name="avg_attendance_rate" type="measure"/>
+                <field name="avg_punctuality_rate" type="measure"/>
+                <field name="overall_score" type="measure"/>
+                <field name="total_late_incidents" type="measure"/>
+                <field name="total_absences" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Analytics Graph View -->
+    <record id="view_attendance_analytics_graph" model="ir.ui.view">
+        <field name="name">hikvision.attendance.analytics.graph</field>
+        <field name="model">hikvision.attendance.analytics</field>
+        <field name="arch" type="xml">
+            <graph string="Analytics Chart" type="bar">
+                <field name="period_name"/>
+                <field name="avg_attendance_rate" type="measure"/>
+                <field name="overall_score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Analytics Search View -->
+    <record id="view_attendance_analytics_search" model="ir.ui.view">
+        <field name="name">hikvision.attendance.analytics.search</field>
+        <field name="model">hikvision.attendance.analytics</field>
+        <field name="arch" type="xml">
+            <search string="Search Analytics">
+                <field name="period_name"/>
+                <field name="department_id"/>
+                <filter string="Monthly" name="monthly" domain="[('period_type', '=', 'monthly')]"/>
+                <filter string="Quarterly" name="quarterly" domain="[('period_type', '=', 'quarterly')]"/>
+                <filter string="High Risk" name="high_risk" domain="[('predicted_absence_risk', '=', 'high')]"/>
+                <filter string="Declining Trend" name="declining" domain="['|', ('attendance_trend', '=', 'declining'), ('punctuality_trend', '=', 'declining')]"/>
+                <group>
+                    <filter string="Period Type" name="group_period_type" context="{'group_by': 'period_type'}"/>
+                    <filter string="Department" name="group_department" context="{'group_by': 'department_id'}"/>
+                    <filter string="Risk Level" name="group_risk" context="{'group_by': 'predicted_absence_risk'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         PERFORMANCE VIEWS (Phase 5)
+    ================================================================ -->
+
+    <!-- Performance List View -->
+    <record id="view_employee_performance_list" model="ir.ui.view">
+        <field name="name">hikvision.employee.performance.list</field>
+        <field name="model">hikvision.employee.performance</field>
+        <field name="arch" type="xml">
+            <list string="Employee Performance">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="month_display"/>
+                <field name="performance_score" decoration-success="performance_score &gt;= 85" decoration-warning="performance_score &lt; 75" decoration-danger="performance_score &lt; 65"/>
+                <field name="performance_grade" decoration-success="performance_grade in ('A+', 'A')" decoration-warning="performance_grade == 'B'" decoration-danger="performance_grade in ('D', 'F')"/>
+                <field name="attendance_rate"/>
+                <field name="punctuality_rate"/>
+                <field name="perfect_attendance_month" widget="boolean"/>
+                <field name="score_trend" decoration-success="score_trend == 'improving'" decoration-danger="score_trend == 'declining'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Performance Form View -->
+    <record id="view_employee_performance_form" model="ir.ui.view">
+        <field name="name">hikvision.employee.performance.form</field>
+        <field name="model">hikvision.employee.performance</field>
+        <field name="arch" type="xml">
+            <form string="Performance Details">
+                <header>
+                    <field name="performance_grade" widget="badge" decoration-success="performance_grade in ('A+', 'A')" decoration-warning="performance_grade == 'B'" decoration-danger="performance_grade in ('D', 'F')"/>
+                    <field name="perfect_attendance_month" widget="badge" decoration-success="perfect_attendance_month == True"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="employee_id"/></h1>
+                        <h3><field name="month_display"/></h3>
+                    </div>
+                    
+                    <group>
+                        <group string="Overall Performance">
+                            <field name="performance_score" widget="progressbar"/>
+                            <field name="score_trend" widget="badge"/>
+                            <field name="score_change"/>
+                            <field name="consecutive_on_time_days"/>
+                        </group>
+                        <group string="Component Scores">
+                            <field name="attendance_score" widget="progressbar"/>
+                            <field name="punctuality_score" widget="progressbar"/>
+                            <field name="consistency_score" widget="progressbar"/>
+                            <field name="overtime_score" widget="progressbar"/>
+                        </group>
+                    </group>
+                    
+                    <group>
+                        <group string="Attendance Metrics">
+                            <field name="working_days"/>
+                            <field name="present_days"/>
+                            <field name="attendance_rate"/>
+                            <field name="punctuality_rate"/>
+                        </group>
+                        <group string="Exception Metrics">
+                            <field name="late_days"/>
+                            <field name="early_leave_days"/>
+                            <field name="overtime_hours"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Strengths">
+                            <field name="strengths" widget="text"/>
+                        </page>
+                        <page string="Improvement Areas">
+                            <field name="improvement_areas" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Performance Pivot View -->
+    <record id="view_employee_performance_pivot" model="ir.ui.view">
+        <field name="name">hikvision.employee.performance.pivot</field>
+        <field name="model">hikvision.employee.performance</field>
+        <field name="arch" type="xml">
+            <pivot string="Performance Pivot">
+                <field name="employee_id" type="row"/>
+                <field name="month_display" type="col"/>
+                <field name="performance_score" type="measure"/>
+                <field name="attendance_score" type="measure"/>
+                <field name="punctuality_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Performance Graph View -->
+    <record id="view_employee_performance_graph" model="ir.ui.view">
+        <field name="name">hikvision.employee.performance.graph</field>
+        <field name="model">hikvision.employee.performance</field>
+        <field name="arch" type="xml">
+            <graph string="Performance Chart" type="bar">
+                <field name="employee_id"/>
+                <field name="performance_score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Performance Search View -->
+    <record id="view_employee_performance_search" model="ir.ui.view">
+        <field name="name">hikvision.employee.performance.search</field>
+        <field name="model">hikvision.employee.performance</field>
+        <field name="arch" type="xml">
+            <search string="Search Performance">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="month_display"/>
+                <filter string="Grade A+" name="grade_aplus" domain="[('performance_grade', '=', 'A+')]"/>
+                <filter string="Grade A" name="grade_a" domain="[('performance_grade', '=', 'A')]"/>
+                <filter string="Perfect Attendance" name="perfect" domain="[('perfect_attendance_month', '=', True)]"/>
+                <filter string="Improving" name="improving" domain="[('score_trend', '=', 'improving')]"/>
+                <filter string="Declining" name="declining" domain="[('score_trend', '=', 'declining')]"/>
+                <group>
+                    <filter string="Employee" name="group_employee" context="{'group_by': 'employee_id'}"/>
+                    <filter string="Department" name="group_department" context="{'group_by': 'department_id'}"/>
+                    <filter string="Grade" name="group_grade" context="{'group_by': 'performance_grade'}"/>
+                    <filter string="Month" name="group_month" context="{'group_by': 'month_display'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    
+    
+</data>
+</odoo>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+
+    <!-- Sync Log List View -->
+    <record id="view_hikvision_sync_log_list" model="ir.ui.view">
+        <field name="name">hikvision.sync.log.list</field>
+        <field name="model">hikvision.sync.log</field>
+        <field name="arch" type="xml">
+            <list string="Device Sync Logs" create="0"
+                  decoration-success="status == 'success'"
+                  decoration-warning="status == 'partial'"
+                  decoration-danger="status == 'failed'">
+                <field name="sync_datetime"/>
+                <field name="device_id"/>
+                <field name="device_location" optional="show"/>
+                <field name="sync_mode"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="records_fetched"/>
+                <field name="records_created"/>
+                <field name="skipped_count"/>
+                <field name="status" widget="badge"
+                       decoration-success="status == 'success'"
+                       decoration-warning="status == 'partial'"
+                       decoration-danger="status == 'failed'"/>
+                <field name="duration_seconds" string="Duration (s)"/>
+                <field name="triggered_by"/>
+                <field name="error_message" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Sync Log Graph View -->
+    <record id="view_hikvision_sync_log_graph" model="ir.ui.view">
+        <field name="name">hikvision.sync.log.graph</field>
+        <field name="model">hikvision.sync.log</field>
+        <field name="arch" type="xml">
+            <graph string="Sync Activity" type="bar">
+                <field name="device_id"/>
+                <field name="records_fetched" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Sync Log Search View -->
+    <record id="view_hikvision_sync_log_search" model="ir.ui.view">
+        <field name="name">hikvision.sync.log.search</field>
+        <field name="model">hikvision.sync.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Sync Logs">
+                <field name="device_id"/>
+                <field name="triggered_by"/>
+                <filter name="success" string="Success" domain="[('status', '=', 'success')]"/>
+                <filter name="partial" string="Partial" domain="[('status', '=', 'partial')]"/>
+                <filter name="failed" string="Failed" domain="[('status', '=', 'failed')]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('sync_date', '=', context_today())]"/>
+                <filter name="this_month" string="This Month"
+                        domain="[('sync_date', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group>
+                    <filter name="group_device" string="Device" context="{'group_by': 'device_id'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_mode" string="Sync Mode" context="{'group_by': 'sync_mode'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'sync_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    
+    
+</data>
+</odoo>

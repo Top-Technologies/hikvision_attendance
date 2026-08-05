@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+
+    <!-- Payroll Summary List View -->
+    <record id="view_hikvision_payroll_summary_list" model="ir.ui.view">
+        <field name="name">hikvision.payroll.summary.list</field>
+        <field name="model">hikvision.payroll.summary</field>
+        <field name="arch" type="xml">
+            <list string="Payroll Attendance Summary"
+                  decoration-warning="absent_days &gt; 3">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="month_display" string="Month"/>
+                <field name="working_days"/>
+                <field name="present_days"/>
+                <field name="absent_days"/>
+                <field name="regular_hours" widget="float_time"/>
+                <field name="weekday_ot_hours" widget="float_time" optional="show"/>
+                <field name="saturday_ot_hours" widget="float_time" optional="show"/>
+                <field name="sunday_ot_hours" widget="float_time" optional="show"/>
+                <field name="holiday_ot_hours" widget="float_time" optional="show"/>
+                <field name="total_ot_hours" widget="float_time"/>
+                <field name="total_ot_payable_hours" widget="float_time"/>
+                <field name="late_deduction_minutes" string="Late Dedn (min)"/>
+                <field name="early_deduction_minutes" string="Early Dedn (min)"/>
+                <field name="total_deduction_minutes" string="Total Dedn (min)"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Payroll Summary Pivot View -->
+    <record id="view_hikvision_payroll_summary_pivot" model="ir.ui.view">
+        <field name="name">hikvision.payroll.summary.pivot</field>
+        <field name="model">hikvision.payroll.summary</field>
+        <field name="arch" type="xml">
+            <pivot string="Payroll Attendance Summary" display_quantity="1">
+                <field name="department_id" type="row"/>
+                <field name="employee_id" type="row"/>
+                <field name="month_display" type="col"/>
+                <field name="regular_hours" type="measure"/>
+                <field name="total_ot_hours" type="measure"/>
+                <field name="total_ot_payable_hours" type="measure"/>
+                <field name="total_deduction_minutes" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <!-- Payroll Summary Search View -->
+    <record id="view_hikvision_payroll_summary_search" model="ir.ui.view">
+        <field name="name">hikvision.payroll.summary.search</field>
+        <field name="model">hikvision.payroll.summary</field>
+        <field name="arch" type="xml">
+            <search string="Search Payroll Summaries">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <filter name="has_ot" string="Has Overtime" domain="[('total_ot_hours', '&gt;', 0)]"/>
+                <filter name="has_deductions" string="Has Deductions" domain="[('total_deduction_minutes', '&gt;', 0)]"/>
+                <group>
+                    <filter name="group_dept" string="Department" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_emp" string="Employee" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_month" string="Month" context="{'group_by': 'month_display'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    
+    
+</data>
+</odoo>

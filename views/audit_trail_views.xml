@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+    
+    
+
+    <record id="view_hikvision_audit_trail_list" model="ir.ui.view">
+        <field name="name">hikvision.audit.trail.list</field>
+        <field name="model">hikvision.audit.trail</field>
+        <field name="arch" type="xml">
+            <list string="Attendance Audit Trail" create="0" delete="0" edit="0"
+                  decoration-warning="action == 'write'"
+                  decoration-danger="action == 'unlink'"
+                  decoration-info="action == 'create'">
+                <field name="changed_at"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="attendance_date" string="Att. Date"/>
+                <field name="action" widget="badge"
+                       decoration-info="action == 'create'"
+                       decoration-warning="action == 'write'"
+                       decoration-danger="action == 'unlink'"/>
+                <field name="field_label" string="Field"/>
+                <field name="old_value" string="Previous"/>
+                <field name="new_value" string="New Value"/>
+                <field name="change_summary"/>
+                <field name="changed_by"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Audit Trail Search View -->
+    <record id="view_hikvision_audit_trail_search" model="ir.ui.view">
+        <field name="name">hikvision.audit.trail.search</field>
+        <field name="model">hikvision.audit.trail</field>
+        <field name="arch" type="xml">
+            <search string="Search Audit Trail">
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="changed_by"/>
+                <field name="attendance_date"/>
+                <filter name="creates" string="Created" domain="[('action', '=', 'create')]"/>
+                <filter name="updates" string="Updated" domain="[('action', '=', 'write')]"/>
+                <filter name="deletions" string="Deleted" domain="[('action', '=', 'unlink')]"/>
+                <separator/>
+                <filter name="today" string="Today" domain="[('changed_at', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter name="this_month" string="This Month"
+                        domain="[('changed_at', '&gt;=', context_today().strftime('%Y-%m-01'))]"/>
+                <group>
+                    <filter name="group_emp" string="Employee" context="{'group_by': 'employee_id'}"/>
+                    <filter name="group_dept" string="Department" context="{'group_by': 'department_id'}"/>
+                    <filter name="group_action" string="Action" context="{'group_by': 'action'}"/>
+                    <filter name="group_user" string="Changed By" context="{'group_by': 'changed_by'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'changed_at:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    
+    
+</data>
+</odoo>
