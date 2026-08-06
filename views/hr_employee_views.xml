@@ -20,11 +20,19 @@
                             <field name="current_month_ot_hours" widget="float_time"/>
                             <field name="current_month_ot_payable" widget="float_time"/>
                             <field name="pending_ot_requests"/>
+                            <field name="current_month_late_minutes" string="Late Minutes"/>
+                            <field name="current_month_absent_hours" widget="float_time" string="Absent Hours"/>
+                            <field name="current_month_total_absent_hours" widget="float_time" string="Total Absent Hours"/>
+                            <field name="current_month_absent_days" string="Absent Days"/>
                         </group>
                         <group string="Historical Summary">
                             <field name="total_ot_hours" widget="float_time"/>
                             <field name="total_ot_payable" widget="float_time"/>
                             <field name="avg_monthly_ot" widget="float_time"/>
+                            <field name="total_late_minutes" string="Late Minutes (Total)"/>
+                            <field name="total_absent_hours" widget="float_time" string="Absent Hours (Total)"/>
+                            <field name="total_total_absent_hours" widget="float_time" string="Total Absent Hours (Total)"/>
+                            <field name="total_absent_days" string="Absent Days (Total)"/>
                         </group>
                     </group>
                     <group>
