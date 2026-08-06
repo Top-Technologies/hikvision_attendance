@@ -7,23 +7,17 @@
         <field name="sequence">50</field>
     </record>
 
-    <!-- Groups Privilege -->
-    <record id="res_groups_privilege_hikvision" model="res.groups.privilege">
-        <field name="name">Hikvision Attendance</field>
-        <field name="category_id" ref="module_category_hikvision"/>
-    </record>
-
     <!-- User Group (Read Only) -->
     <record id="group_hikvision_user" model="res.groups">
         <field name="name">User</field>
-        <field name="privilege_id" ref="res_groups_privilege_hikvision"/>
+        <field name="category_id" ref="module_category_hikvision"/>
         <field name="comment">Can view attendance records but cannot edit.</field>
     </record>
 
     <!-- HR Manager Group (Limited Edit) -->
     <record id="group_hikvision_hr" model="res.groups">
         <field name="name">HR Manager</field>
-        <field name="privilege_id" ref="res_groups_privilege_hikvision"/>
+        <field name="category_id" ref="module_category_hikvision"/>
         <field name="implied_ids" eval="[Command.link(ref('group_hikvision_user'))]"/>
         <field name="comment">Can view and manage attendance records. Can sync with devices.</field>
     </record>
@@ -31,9 +25,9 @@
     <!-- Admin Group (Full Access) -->
     <record id="group_hikvision_admin" model="res.groups">
         <field name="name">Administrator</field>
-        <field name="privilege_id" ref="res_groups_privilege_hikvision"/>
+        <field name="category_id" ref="module_category_hikvision"/>
         <field name="implied_ids" eval="[Command.link(ref('group_hikvision_hr'))]"/>
         <field name="comment">Full access to all Hikvision features including editing attendance and managing devices.</field>
-        <field name="user_ids" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
     </record>
 </odoo>
