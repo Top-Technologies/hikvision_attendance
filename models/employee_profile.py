@@ -41,22 +41,33 @@ class HikvisionEmployeeProfile(models.Model):
     def init(self):
         """Create SQL view for employee attendance profile.
 
-        NOTE (Odoo 19 compatibility): This view assumes that department_id and 
-        job_id are stored on the hr_version table (linked via current_version_id),
-        not directly on hr_employee. This is the standard Odoo 19+ schema.
-        
-        If using an older Odoo version or customized schema, you may need to 
-        adjust the LEFT JOIN to reference hr_employee.department_id directly.
+        NOTE: This view dynamically detects the presence of the `hr_version` table
+        (used in Odoo 19+ for department_id/job_id tracking) and falls back to
+        direct querying of hr_employee for Odoo 18.
         """
         self.env.cr.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'hr_version'
+            );
+        """)
+        has_hr_version = self.env.cr.fetchone()[0]
+
+        if has_hr_version:
+            select_dept_job = "v.department_id as department_id, v.job_id as job_id,"
+            join_clause = "LEFT JOIN hr_version v ON v.id = e.current_version_id"
+        else:
+            select_dept_job = "e.department_id as department_id, e.job_id as job_id,"
+            join_clause = ""
+
+        self.env.cr.execute(f"""
             DROP VIEW IF EXISTS hikvision_employee_profile;
             CREATE OR REPLACE VIEW hikvision_employee_profile AS (
                 SELECT
                     e.id as id,
                     e.id as employee_id,
                     e.name as employee_name,
-                    v.department_id as department_id,
-                    v.job_id as job_id,
+                    {select_dept_job}
                     e.company_id as company_id,
 
                     -- Today's hours
@@ -182,8 +193,7 @@ class HikvisionEmployeeProfile(models.Model):
                     ), 0) as avg_daily_hours
 
                 FROM hr_employee e
-                -- Odoo 19: department_id/job_id are on hr.version, not hr_employee
-                LEFT JOIN hr_version v ON v.id = e.current_version_id
+                {join_clause}
                 WHERE e.active = true
             )
         """)
