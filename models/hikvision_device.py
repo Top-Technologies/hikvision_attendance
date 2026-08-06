@@ -1733,9 +1733,15 @@ class HikvisionDevice(models.Model):
     def _ensure_complete_attendance(self, start_date, end_date):
         """
         Ensure every active employee has a hikvision.attendance record for 
-        every day between start_date and end_date.
-        Records without check-ins will automatically be marked as 'Absent'.
+        every day between start_date and end_date, correctly computed from 
+        the event logs.
         """
+        # Convert strings to date objects if needed
+        if isinstance(start_date, str):
+            start_date = fields.Date.from_string(start_date)
+        if isinstance(end_date, str):
+            end_date = fields.Date.from_string(end_date)
+            
         # Get all active employees who belong to a Work Policy (meaning they are tracked)
         employees = self.env['hr.employee'].sudo().search([
             ('active', '=', True),
@@ -1752,41 +1758,81 @@ class HikvisionDevice(models.Model):
         now_local = fields.Datetime.context_timestamp(self, datetime.datetime.now())
         current_hour = now_local.hour
         
-        # Cleanup today's records if we are before 6 PM and they are empty/absent
-        # This fixes users who are "already absent" during the morning
-        if current_hour < 18:
-            today_absentees = HikAttendance.sudo().search([
-                ('date', '=', today),
-                ('first_check_in', '=', False)
-            ])
-            if today_absentees:
-                _logger.info(f"Removing {len(today_absentees)} premature absentee records for {today}")
-                today_absentees.unlink()
-
-        # Iterate through date range
+        # 1. Bulk query all event logs for these employees and date range
+        logs = self.env['hikvision.event.log'].search([
+            ('employee_id', 'in', employees.ids),
+            ('event_date', '>=', start_date),
+            ('event_date', '<=', end_date)
+        ], order='timestamp asc')
+        
+        # Group logs by (employee_id, event_date)
+        logs_map = {}
+        for log in logs:
+            key = (log.employee_id.id, log.event_date)
+            if key not in logs_map:
+                logs_map[key] = []
+            logs_map[key].append(log)
+            
+        # 2. Bulk query all existing attendance records for this range and employees
+        existing_recs = HikAttendance.search([
+            ('date', '>=', start_date),
+            ('date', '<=', end_date),
+            ('employee_id', 'in', employees.ids)
+        ])
+        
+        # Map existing records by (employee_id, date)
+        attendance_map = {(rec.employee_id.id, rec.date): rec for rec in existing_recs}
+        
+        # 3. Iterate through dates and employees
         curr_date = start_date
         while curr_date <= end_date:
-            # Shield "Today" or any future Date from being marked as absent before 6 PM (18:00)
-            if curr_date >= today and current_hour < 18:
-                curr_date += timedelta(days=1)
-                continue
-
-            # Check for existing records for this date to avoid mass queries
-            existing_recs = HikAttendance.search([
-                ('date', '=', curr_date),
-                ('employee_id', 'in', employees.ids)
-            ])
-            employees_with_record = existing_recs.mapped('employee_id')
+            is_today_before_6pm = (curr_date >= today and current_hour < 18)
             
-            employees_to_create = employees - employees_with_record
-            
-            if employees_to_create:
-                _logger.info(f"Creating {len(employees_to_create)} absentee records for {curr_date}")
-                for emp in employees_to_create:
-                    HikAttendance.create({
-                        'employee_id': emp.id,
-                        'date': curr_date,
-                        # No check-in/out makes it 'absent'
-                    })
-            
+            for emp in employees:
+                key = (emp.id, curr_date)
+                day_record = attendance_map.get(key)
+                emp_logs = logs_map.get(key, [])
+                
+                if emp_logs:
+                    first_in = emp_logs[0].timestamp
+                    last_out = emp_logs[-1].timestamp if len(emp_logs) > 1 else False
+                    status = 'out' if len(emp_logs) > 1 else 'in'
+                    
+                    if not day_record:
+                        HikAttendance.create({
+                            'employee_id': emp.id,
+                            'date': curr_date,
+                            'first_check_in': first_in,
+                            'last_check_out': last_out,
+                            'status': status
+                        })
+                    else:
+                        day_record.write({
+                            'first_check_in': first_in,
+                            'last_check_out': last_out,
+                            'status': status
+                        })
+                else:
+                    # No logs for this employee on this date
+                    # Only create/keep absent record if it's not today before 6 PM
+                    if not is_today_before_6pm:
+                        if not day_record:
+                            HikAttendance.create({
+                                'employee_id': emp.id,
+                                'date': curr_date,
+                                'first_check_in': False,
+                                'last_check_out': False,
+                                'status': False
+                            })
+                        else:
+                            day_record.write({
+                                'first_check_in': False,
+                                'last_check_out': False,
+                                'status': False
+                            })
+                    else:
+                        # Before 6 PM on today, delete premature absentee record if it exists
+                        if day_record and not day_record.first_check_in:
+                            day_record.unlink()
+                            
             curr_date += timedelta(days=1)
