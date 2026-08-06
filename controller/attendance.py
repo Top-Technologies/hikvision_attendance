@@ -4,7 +4,7 @@ from odoo.http import request
 
 class HikvisionAttendanceController(http.Controller):
 
-    @http.route('/hikvision/toggle_attendance', auth='user', type='jsonrpc', methods=['POST'])
+    @http.route('/hikvision/toggle_attendance', auth='user', type='json', methods=['POST'])
     def toggle_attendance(self):
         """Toggle attendance (check-in / check-out) for the currently logged-in employee."""
         employee = request.env['hr.employee'].sudo().search(
