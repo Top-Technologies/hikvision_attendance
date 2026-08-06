@@ -17,6 +17,40 @@ class HrEmployee(models.Model):
         string='Hikvision Attendance Records'
     )
     
+    # Absenteeism Statistics (Late minutes & Absent days)
+    current_month_late_minutes = fields.Integer(
+        string="Late Minutes (Current Month)",
+        compute="_compute_absent_stats",
+    )
+    total_late_minutes = fields.Integer(
+        string="Late Minutes (Total)",
+        compute="_compute_absent_stats",
+    )
+    current_month_absent_hours = fields.Float(
+        string="Absent Hours (Current Month)",
+        compute="_compute_absent_stats",
+    )
+    total_absent_hours = fields.Float(
+        string="Absent Hours (Total)",
+        compute="_compute_absent_stats",
+    )
+    current_month_total_absent_hours = fields.Float(
+        string="Total Absent Hours (Current Month)",
+        compute="_compute_absent_stats",
+    )
+    total_total_absent_hours = fields.Float(
+        string="Total Absent Hours (Total)",
+        compute="_compute_absent_stats",
+    )
+    current_month_absent_days = fields.Integer(
+        string="Absent Days (Current Month)",
+        compute="_compute_absent_stats",
+    )
+    total_absent_days = fields.Integer(
+        string="Absent Days (Total)",
+        compute="_compute_absent_stats",
+    )
+    
     # Current Month OT Statistics
     current_month_ot_hours = fields.Float(
         string="Current Month OT Hours",
@@ -206,4 +240,34 @@ class HrEmployee(models.Model):
             'domain': [('employee_id', '=', self.id), ('overtime_hours', '>', 0)],
             'context': {'default_employee_id': self.id},
         }
+
+    @api.depends('hikvision_attendance_ids.late_minutes', 'hikvision_attendance_ids.absent_hours', 'hikvision_attendance_ids.attendance_status', 'hikvision_attendance_ids.date')
+    def _compute_absent_stats(self):
+        for employee in self:
+            today = fields.Date.today()
+            start_of_month = today.replace(day=1)
+            
+            # Current month records
+            current_month_recs = employee.hikvision_attendance_ids.filtered(
+                lambda r: r.date and r.date >= start_of_month
+            )
+            
+            # All records
+            all_recs = employee.hikvision_attendance_ids
+            
+            # 1. Late Minutes
+            employee.current_month_late_minutes = sum(current_month_recs.mapped('late_minutes'))
+            employee.total_late_minutes = sum(all_recs.mapped('late_minutes'))
+            
+            # 2. Absent Hours (from absent days only)
+            employee.current_month_absent_hours = sum(current_month_recs.mapped('absent_hours'))
+            employee.total_absent_hours = sum(all_recs.mapped('absent_hours'))
+            
+            # 3. Total Absent Hours = Absent Hours + (Late Minutes / 60.0)
+            employee.current_month_total_absent_hours = employee.current_month_absent_hours + (employee.current_month_late_minutes / 60.0)
+            employee.total_total_absent_hours = employee.total_absent_hours + (employee.total_late_minutes / 60.0)
+            
+            # 4. Absent Days
+            employee.current_month_absent_days = len(current_month_recs.filtered(lambda r: r.attendance_status == 'absent'))
+            employee.total_absent_days = len(all_recs.filtered(lambda r: r.attendance_status == 'absent'))
 
