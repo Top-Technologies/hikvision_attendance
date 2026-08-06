@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, Command, _
 from datetime import datetime, timedelta
 import pytz
 
@@ -24,15 +24,19 @@ class HikvisionAttendance(models.Model):
         ('present', 'Present'),
         ('incomplete', 'Incomplete'),
         ('absent', 'Absent'),
+        ('weekend', 'Weekend'),
+        ('holiday', 'Holiday'),
     ], string="Attendance", compute="_compute_attendance_status", store=True)
     
     # Computed fields
     total_hours = fields.Float(string="Total Hours", compute="_compute_total_hours", store=True)
     working_minutes = fields.Integer(string="Working Minutes", compute="_compute_working_minutes", store=True, help="Total minutes minus 60 minutes lunch break (480 min = 8 hours)")
-    is_late = fields.Boolean(string="Late", compute="_compute_late_early", store=True)
-    is_early_leave = fields.Boolean(string="Early Leave", compute="_compute_late_early", store=True)
-    late_minutes = fields.Integer(string="Late (min)", compute="_compute_late_early", store=True)
-    early_leave_minutes = fields.Integer(string="Early (min)", compute="_compute_late_early", store=True)
+    is_late = fields.Boolean(string="Late", compute="_compute_is_late", store=True)
+    is_early_leave = fields.Boolean(string="Early Leave", compute="_compute_early_leave", store=True)
+    late_minutes = fields.Integer(string="Late (min)", compute="_compute_late_minutes", inverse="_inverse_late_minutes", store=True, readonly=False)
+    late_hours = fields.Float(string="Late Hours", compute="_compute_late_hours", store=True)
+    early_leave_minutes = fields.Integer(string="Early (min)", compute="_compute_early_leave", store=True)
+    absent_hours = fields.Float(string="Absent Hours", compute="_compute_absent_hours", store=True)
     
     # Overtime & Approval
     overtime_hours = fields.Float(string="Overtime Hours", compute="_compute_overtime", store=True)
@@ -57,7 +61,7 @@ class HikvisionAttendance(models.Model):
     
     approver_ids = fields.Many2many('res.users', string="Approvers", help="List of users who can approve this request")
 
-    @api.depends('first_check_in', 'last_check_out')
+    @api.depends('first_check_in', 'last_check_out', 'employee_id.resource_calendar_id', 'date')
     def _compute_attendance_status(self):
         for rec in self:
             if rec.first_check_in and rec.last_check_out:
@@ -65,7 +69,21 @@ class HikvisionAttendance(models.Model):
             elif rec.first_check_in and not rec.last_check_out:
                 rec.attendance_status = 'incomplete'
             else:
-                rec.attendance_status = 'absent'
+                # Check if weekend or holiday
+                is_sunday = (rec.date.weekday() == 6) if rec.date else False
+                is_holiday = False
+                if rec.date and rec.employee_id.resource_calendar_id:
+                    leaves = rec.employee_id.resource_calendar_id.global_leave_ids
+                    for leave in leaves:
+                        if leave.date_from.date() <= rec.date <= leave.date_to.date():
+                            is_holiday = True
+                            break
+                if is_holiday:
+                    rec.attendance_status = 'holiday'
+                elif is_sunday:
+                    rec.attendance_status = 'weekend'
+                else:
+                    rec.attendance_status = 'absent'
 
     @api.depends('employee_id', 'employee_id.department_id')
     def _compute_department_id(self):
@@ -104,59 +122,93 @@ class HikvisionAttendance(models.Model):
             else:
                 rec.working_minutes = 0
 
-    @api.depends('first_check_in', 'last_check_out', 'employee_id.attendance_policy_id', 'date')
-    def _compute_late_early(self):
+    @api.depends('first_check_in', 'employee_id.attendance_policy_id', 'date')
+    def _compute_late_minutes(self):
         for rec in self:
-            rec.is_late = False
-            rec.is_early_leave = False
             rec.late_minutes = 0
-            rec.early_leave_minutes = 0
-            
-            if not rec.employee_id or not rec.date:
+            if not rec.employee_id or not rec.date or not rec.first_check_in:
                 continue
-            
             policy = rec.employee_id.attendance_policy_id
             if not policy or policy.ignore_late_early:
                 continue
                 
-            # robust timezone fallback: Policy > Employee > User > Company > UTC
             tz_name = (policy and policy.tz) or rec.employee_id.tz or self.env.user.tz or self.env.company.partner_id.tz or 'UTC'
             try:
                 local_tz = pytz.timezone(tz_name)
             except:
                 local_tz = pytz.UTC
             
-            # Check Late Arrival
-            if rec.first_check_in:
-                # Convert UTC check-in to local time
-                check_in_local = rec.first_check_in.replace(tzinfo=pytz.UTC).astimezone(local_tz)
-                check_in_hour = check_in_local.hour + check_in_local.minute / 60.0
-                
-                # Work start time + tolerance (e.g., 8.5 + 15/60 = 8.75 = 8:45)
-                late_limit = policy.work_start + (policy.late_tolerance / 60.0)
-                
-                if check_in_hour > late_limit:
-                    rec.is_late = True
-                    # Calculate late minutes from work_start (total time late)
-                    # e.g., check-in at 8:46 (8.766), work_start at 8:30 (8.5)
-                    # late_minutes = (8.766 - 8.5) * 60 = 16 minutes
-                    rec.late_minutes = int((check_in_hour - policy.work_start) * 60)
+            check_in_local = rec.first_check_in.replace(tzinfo=pytz.UTC).astimezone(local_tz)
+            check_in_hour = check_in_local.hour + check_in_local.minute / 60.0
+            
+            late_limit = policy.work_start + (policy.late_tolerance / 60.0)
+            if check_in_hour > late_limit:
+                rec.late_minutes = int((check_in_hour - policy.work_start) * 60)
 
-            # Check Early Leave
-            if rec.last_check_out:
-                # Convert UTC check-out to local time
-                check_out_local = rec.last_check_out.replace(tzinfo=pytz.UTC).astimezone(local_tz)
-                check_out_hour = check_out_local.hour + check_out_local.minute / 60.0
+    def _inverse_late_minutes(self):
+        pass
+
+    @api.depends('late_minutes')
+    def _compute_is_late(self):
+        for rec in self:
+            rec.is_late = rec.late_minutes > 0
+
+    @api.depends('late_minutes')
+    def _compute_late_hours(self):
+        for rec in self:
+            rec.late_hours = rec.late_minutes / 60.0
+
+    @api.depends('last_check_out', 'employee_id.attendance_policy_id', 'date')
+    def _compute_early_leave(self):
+        for rec in self:
+            rec.is_early_leave = False
+            rec.early_leave_minutes = 0
+            if not rec.employee_id or not rec.date or not rec.last_check_out:
+                continue
+            policy = rec.employee_id.attendance_policy_id
+            if not policy or policy.ignore_late_early:
+                continue
                 
-                # Work end time - tolerance (e.g., 17.5 - 15/60 = 17.25 = 17:15)
-                early_limit = policy.work_end - (policy.early_leave_tolerance / 60.0)
+            tz_name = (policy and policy.tz) or rec.employee_id.tz or self.env.user.tz or self.env.company.partner_id.tz or 'UTC'
+            try:
+                local_tz = pytz.timezone(tz_name)
+            except:
+                local_tz = pytz.UTC
+            
+            # Saturday check
+            work_end = policy.work_end
+            if rec.date and rec.date.weekday() == 5:
+                work_end = policy.work_end_saturday
                 
-                if check_out_hour < early_limit:
-                    rec.is_early_leave = True
-                    # Calculate early leave minutes from check-out to work_end
-                    # e.g., check-out at 17:18 (17.3), work_end at 17:30 (17.5)
-                    # early_leave_minutes = (17.5 - 17.3) * 60 = 12 minutes
-                    rec.early_leave_minutes = int((policy.work_end - check_out_hour) * 60)
+            check_out_local = rec.last_check_out.replace(tzinfo=pytz.UTC).astimezone(local_tz)
+            check_out_hour = check_out_local.hour + check_out_local.minute / 60.0
+            
+            # Check-out crossing midnight (next day)
+            if check_out_local.date() > rec.date:
+                check_out_hour += 24.0
+                
+            early_limit = work_end - (policy.early_leave_tolerance / 60.0)
+            if check_out_hour < early_limit:
+                rec.is_early_leave = True
+                rec.early_leave_minutes = int((work_end - check_out_hour) * 60)
+
+    @api.depends('attendance_status', 'employee_id.attendance_policy_id', 'date')
+    def _compute_absent_hours(self):
+        for rec in self:
+            if rec.attendance_status == 'absent':
+                policy = rec.employee_id.attendance_policy_id
+                lunch_hour = (policy.lunch_duration / 60.0) if policy else 1.0
+                work_start = policy.work_start if policy else 8.5
+                work_end = policy.work_end if policy else 17.5
+                
+                # Saturday
+                if rec.date and rec.date.weekday() == 5:
+                    work_end = policy.work_end_saturday if policy else 13.0
+                    lunch_hour = 0.0
+                
+                rec.absent_hours = max(0.0, work_end - work_start - lunch_hour)
+            else:
+                rec.absent_hours = 0.0
 
     @api.depends('last_check_out', 'employee_id.attendance_policy_id', 'manual_overtime', 'date', 'approval_state')
     def _compute_overtime(self):
@@ -177,6 +229,7 @@ class HikvisionAttendance(models.Model):
                 if rec.date and rec.date.weekday() == 5 and policy:
                     cutoff_hour = policy.work_end_saturday
                 dt_local = None  # No real checkout time for manual claims
+                ot_start = cutoff_hour
             else:
                 # AUTO CALCULATION
                 if not policy or not policy.ot_apply or not rec.last_check_out:
@@ -208,13 +261,13 @@ class HikvisionAttendance(models.Model):
 
                 raw_ot_hours = 0.0
                 if check_out_hour > ot_start:
-                    raw_ot_hours = check_out_hour - cutoff_hour
+                    raw_ot_hours = check_out_hour - ot_start
                     # Cap at the configured end limit
                     limit = policy.ot_end_limit
                     if limit < 12.0:
                         limit += 24.0  # limit is usually next morning (e.g. 6 → 30)
                     if check_out_hour > limit:
-                        raw_ot_hours = limit - cutoff_hour
+                        raw_ot_hours = limit - ot_start
 
                 raw_ot_hours = max(0.0, raw_ot_hours)
 
@@ -246,8 +299,8 @@ class HikvisionAttendance(models.Model):
                 rate = policy.rate_saturday
 
             # Iterate over time intervals to apply time-based rate overrides
-            current = cutoff_hour
-            end = cutoff_hour + raw_ot_hours
+            current = ot_start
+            end = ot_start + raw_ot_hours
 
             points = [current, end]
 
@@ -369,14 +422,38 @@ class HikvisionAttendance(models.Model):
         
     def action_first_approve(self):
         self.ensure_one()
+        manager_user = self.employee_id.parent_id.user_id
+        is_manager = manager_user and self.env.user == manager_user
+        is_hr = self.env.user.has_group('hikvision_attendance.group_hikvision_hr')
+        is_admin = self.env.user.has_group('hikvision_attendance.group_hikvision_admin')
+        
+        if not (is_manager or is_hr or is_admin):
+            raise UserError(_("Only the employee's manager or an HR Manager can approve this request."))
+            
         self.approval_state = 'second_approval'
+        self.approver_ids = [Command.link(self.env.user.id)]
 
     def action_second_approve(self):
         self.ensure_one()
+        is_hr = self.env.user.has_group('hikvision_attendance.group_hikvision_hr')
+        is_admin = self.env.user.has_group('hikvision_attendance.group_hikvision_admin')
+        
+        if not (is_hr or is_admin):
+            raise UserError(_("Only an HR Manager or Administrator can perform the final approval."))
+            
         self.approval_state = 'approved'
+        self.approver_ids = [Command.link(self.env.user.id)]
         
     def action_refuse_ot(self):
         self.ensure_one()
+        manager_user = self.employee_id.parent_id.user_id
+        is_manager = manager_user and self.env.user == manager_user
+        is_hr = self.env.user.has_group('hikvision_attendance.group_hikvision_hr')
+        is_admin = self.env.user.has_group('hikvision_attendance.group_hikvision_admin')
+        
+        if not (is_manager or is_hr or is_admin):
+            raise UserError(_("Only the employee's manager or an HR Manager can refuse this request."))
+            
         self.approval_state = 'refused'
         self.overtime_hours = 0.0
         self.ot_payable_hours = 0.0
