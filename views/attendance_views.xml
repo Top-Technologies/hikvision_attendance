@@ -6,14 +6,14 @@
         <field name="name">hikvision.attendance.list</field>
         <field name="model">hikvision.attendance</field>
         <field name="arch" type="xml">
-            <list string="Attendance Records" create="0" decoration-danger="attendance_status == 'absent'" decoration-warning="attendance_status == 'incomplete'" decoration-success="attendance_status == 'present'">
+            <list string="Attendance Records" create="0" decoration-danger="attendance_status == 'absent'" decoration-warning="attendance_status == 'incomplete'" decoration-success="attendance_status == 'present'" decoration-muted="attendance_status == 'weekend'" decoration-info="attendance_status == 'holiday'">
                 <header>
                     <button name="%(hikvision_attendance.action_fetch_attendance_wizard)d" string="Fetch Records" type="action" class="btn-primary" display="always"/>
                 </header>
                 <field name="employee_id"/>
                 <field name="department_id" optional="show"/>
                 <field name="date"/>
-                <field name="attendance_status" widget="badge" decoration-success="attendance_status == 'present'" decoration-warning="attendance_status == 'incomplete'" decoration-danger="attendance_status == 'absent'"/>
+                <field name="attendance_status" widget="badge" decoration-success="attendance_status == 'present'" decoration-warning="attendance_status == 'incomplete'" decoration-danger="attendance_status == 'absent'" decoration-muted="attendance_status == 'weekend'" decoration-info="attendance_status == 'holiday'"/>
                 <field name="first_check_in"/>
                 <field name="last_check_out"/>
                 <field name="working_minutes" string="Work Minutes"/>
@@ -37,9 +37,9 @@
                 <header>
                     <button name="action_submit_ot" string="Submit OT" type="object" class="oe_highlight" invisible="approval_state != 'draft' or overtime_hours == 0"/>
                     <button name="action_manual_request" string="Claim Overtime" type="object" class="oe_highlight" invisible="approval_state != 'draft'"/>
-                    <button name="action_first_approve" string="Approve (Manager)" type="object" class="oe_highlight" invisible="approval_state != 'to_approve'" groups="hikvision_attendance.group_hikvision_hr"/>
+                    <button name="action_first_approve" string="Approve (Manager)" type="object" class="oe_highlight" invisible="approval_state != 'to_approve'"/>
                     <button name="action_second_approve" string="Approve (HR)" type="object" class="oe_highlight" invisible="approval_state != 'second_approval'" groups="hikvision_attendance.group_hikvision_hr"/>
-                    <button name="action_refuse_ot" string="Refuse" type="object" invisible="approval_state not in ('to_approve', 'second_approval')" groups="hikvision_attendance.group_hikvision_hr"/>
+                    <button name="action_refuse_ot" string="Refuse" type="object" invisible="approval_state not in ('to_approve', 'second_approval')"/>
                     <field name="approval_state" widget="statusbar" statusbar_visible="draft,to_approve,second_approval,approved"/>
                 </header>
                 <sheet>
@@ -54,6 +54,8 @@
                     <widget name="web_ribbon" title="Present" bg_color="text-bg-success" invisible="attendance_status != 'present'"/>
                     <widget name="web_ribbon" title="Incomplete" bg_color="text-bg-warning" invisible="attendance_status != 'incomplete'"/>
                     <widget name="web_ribbon" title="Absent" bg_color="text-bg-danger" invisible="attendance_status != 'absent'"/>
+                    <widget name="web_ribbon" title="Weekend" bg_color="text-bg-secondary" invisible="attendance_status != 'weekend'"/>
+                    <widget name="web_ribbon" title="Holiday" bg_color="text-bg-info" invisible="attendance_status != 'holiday'"/>
                     <group>
                         <group>
                             <field name="employee_id" readonly="1"/>
@@ -66,12 +68,14 @@
                             <field name="last_check_out"/>
                             <field name="working_minutes" string="Working Minutes (480 = 8 hrs)"/>
                             <field name="total_hours" widget="float_time" string="Total Hours (incl. lunch)"/>
+                            <field name="absent_hours" widget="float_time" readonly="1"/>
                         </group>
                     </group>
                     <group string="Attendance Status">
                         <group>
                             <field name="is_late"/>
-                            <field name="late_minutes" invisible="not is_late"/>
+                            <field name="late_minutes"/>
+                            <field name="late_hours" widget="float_time" readonly="1"/>
                         </group>
                         <group>
                             <field name="is_early_leave"/>
